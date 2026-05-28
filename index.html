@@ -1,0 +1,3931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AOS Operations Console · FBSPL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Brand fonts (Futura PT — licensed) ---------- */
+  @font-face { font-family: "Futura PT"; src: url("fonts/fonnts.com-Futura_PT_Book.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Futura PT"; src: url("fonts/fonnts.com-Futura_PT_Book_Oblique.otf") format("opentype"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Futura PT"; src: url("fonts/fonnts.com-Futura_PT_Bold.otf") format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Futura PT Cond"; src: url("fonts/fonnts.com-Futura_PT_Cond_Book.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Futura PT Cond"; src: url("fonts/fonnts.com-Futura_PT_Cond_Bold.otf") format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Futura PT Cond"; src: url("fonts/fonnts.com-Futura_PT_Cond_Extra_Bold.otf") format("opentype"); font-weight: 800; font-style: normal; font-display: swap; }
+
+  :root {
+    --fbspl-white: #FFFFFF;
+    --fbspl-blue:  #002CCE;
+    --fbspl-soft:  #E2E2FF;
+    --fbspl-black: #000000;
+
+    --accent:        #002CCE;
+    --accent-hover:  #0022A8;
+    --accent-press:  #001B85;
+    --accent-soft:   #E2E2FF;
+
+    --bg:        #FFFFFF;
+    --bg-card:   #FFFFFF;
+    --bg-soft:   #F4F4FF;
+    --ink:       #000000;
+    --ink-soft:  rgba(0,0,0,0.72);
+    --ink-mute:  rgba(0,0,0,0.56);
+    --ink-faint: rgba(0,0,0,0.40);
+    --line:      rgba(0,0,0,0.12);
+    --line-soft: rgba(0,0,0,0.06);
+
+    /* status hues */
+    --st-pending: #B07A00;  --st-pending-bg: #FFF4D6;
+    --st-active:  #002CCE;  --st-active-bg:  #E2E2FF;
+    --st-done:    #1F7A3D;  --st-done-bg:    #E3F4E8;
+    --st-late:    #9C2A2A;  --st-late-bg:    #FBE6E6;
+
+    --font-sans:    "Futura PT", "Helvetica Neue", system-ui, sans-serif;
+    --font-display: "Futura PT Cond", "Futura PT", "Helvetica Neue", sans-serif;
+    --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+    --shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 1px 1px rgba(0,0,0,.04);
+    --shadow-2: 0 4px 14px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-3: 0 12px 32px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+    --ring-focus: 0 0 0 3px rgba(0,44,206,.25);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===================== HEADER ===================== */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid var(--line);
+  }
+  .head-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 32px;
+    max-width: 1440px; margin: 0 auto;
+    padding: 18px 48px;
+  }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand img.logo { height: 26px; width: auto; display: block; }
+  .brand .sep { width: 1px; height: 22px; background: var(--line); }
+  .brand-meta { display: flex; flex-direction: column; gap: 1px; }
+  .brand-mark { font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-mute); }
+  .brand-meta .product { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink); letter-spacing: -.005em; }
+
+  .head-meta { display: flex; align-items: center; gap: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+  .head-meta .conn-state {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; background: rgba(0,0,0,0.05); border-radius: 999px;
+  }
+  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-mute); box-shadow: 0 0 0 3px rgba(0,0,0,.06); transition: all 200ms; }
+  .head-meta .conn-state.live { background: #E3F4E8; color: #1F7A3D; }
+  .head-meta .conn-state.live .conn-dot { background: #2BAE53; box-shadow: 0 0 0 3px rgba(43,174,83,.18); }
+  .head-meta .conn-state.offline { background: #FBE6E6; color: #9C2A2A; }
+  .head-meta .conn-state.offline .conn-dot { background: #D44A4A; box-shadow: 0 0 0 3px rgba(212,74,74,.18); }
+
+  /* ===================== HERO ===================== */
+  .hero {
+    position: relative;
+    background: var(--fbspl-blue);
+    color: var(--fbspl-white);
+    overflow: hidden;
+    border-bottom: 1px solid var(--ink);
+  }
+  .hero .phoenix { position: absolute; right: -40px; top: -20px; bottom: -20px; width: 360px; opacity: .15; filter: brightness(0) invert(1); pointer-events: none; }
+  .hero-inner { max-width: 1440px; margin: 0 auto; padding: 56px 48px 60px; position: relative; }
+  .hero .overline {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(255,255,255,.7); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero .overline::after { content: ''; flex: 0 0 80px; height: 1px; background: rgba(255,255,255,.4); }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(40px, 5.4vw, 68px); line-height: 1.0; letter-spacing: -.02em;
+    margin: 0 0 16px; color: var(--fbspl-white); max-width: 22ch;
+  }
+  .hero h1 .accent { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--fbspl-soft); }
+  .hero .lede { font-size: 17px; line-height: 1.5; color: rgba(255,255,255,.78); max-width: 64ch; margin: 0; }
+
+  /* ===================== STATS STRIP ===================== */
+  .stats-strip {
+    max-width: 1440px; margin: 0 auto;
+    padding: 32px 48px 0;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px;
+  }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: border-color 200ms, box-shadow 200ms;
+  }
+  .stat:hover { border-color: rgba(0,44,206,.3); box-shadow: var(--shadow-1); }
+  .stat .label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 6px;
+  }
+  .stat .value {
+    font-family: var(--font-display); font-weight: 700; font-size: 32px;
+    color: var(--ink); letter-spacing: -.02em; line-height: 1;
+  }
+  .stat .value.muted { color: var(--ink-mute); }
+  .stat .sub {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  /* ===================== MAIN ===================== */
+  main {
+    max-width: 1440px; margin: 0 auto;
+    padding: 32px 48px 100px;
+    display: grid; grid-template-columns: 400px 1fr; gap: 32px;
+  }
+
+  /* ===================== ADD-CLIENT CARD ===================== */
+  .add-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 28px;
+    align-self: start;
+    position: sticky; top: 96px;
+    box-shadow: var(--shadow-1);
+  }
+  .add-card h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    margin: 0 0 4px; letter-spacing: -.01em;
+  }
+  .add-card .sub {
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 20px;
+  }
+  .field { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-soft); font-weight: 500; margin-bottom: 6px;
+  }
+  label .req { color: var(--st-late); margin-left: 2px; }
+  label .hint { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-size: 12px; color: var(--ink-mute); margin-left: 6px; font-weight: 400; }
+  input[type="text"], input[type="email"], input[type="number"], input[type="date"], textarea, select {
+    width: 100%;
+    border: 1px solid var(--line); background: var(--fbspl-white);
+    padding: 10px 12px;
+    font-family: var(--font-sans); font-size: 14px; color: var(--ink);
+    border-radius: 8px;
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+  input:hover, textarea:hover, select:hover { border-color: rgba(0,0,0,.24); }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: var(--ring-focus); }
+  input.err, textarea.err, select.err { border-color: var(--st-late); }
+  textarea { min-height: 80px; resize: vertical; }
+
+  .add-card .actions {
+    margin-top: 22px; display: flex; gap: 8px; justify-content: space-between; align-items: center;
+  }
+  .add-card .actions .note {
+    font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute);
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  button {
+    font-family: var(--font-sans); font-size: 14px; font-weight: 700;
+    padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+  }
+  button.primary {
+    background: var(--ink); color: var(--fbspl-white); border-color: var(--ink);
+  }
+  button.primary:hover { background: var(--accent); border-color: var(--accent); }
+  button.primary:active { transform: scale(.98); }
+  button.ghost {
+    background: transparent; color: var(--ink); border-color: var(--line);
+  }
+  button.ghost:hover { border-color: var(--ink); background: var(--bg-soft); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,44,206,.3); }
+
+  /* ===================== CLIENTS TABLE ===================== */
+  .clients-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-1);
+  }
+  .clients-head {
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .clients-head .title-wrap {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .clients-head h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    margin: 0; letter-spacing: -.01em;
+  }
+  .clients-head .count {
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-mute);
+    background: var(--bg-soft); padding: 4px 10px; border-radius: 999px;
+  }
+  .filters {
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  }
+  .filters input[type="text"] {
+    width: 220px; padding: 7px 12px; font-size: 13px; border-radius: 8px;
+  }
+  .filters select {
+    padding: 7px 28px 7px 12px; font-size: 12px; border-radius: 8px;
+    background: var(--fbspl-white);
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23000' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .filters button { padding: 7px 14px; font-size: 12px; font-weight: 500; }
+
+  table {
+    width: 100%; border-collapse: collapse;
+  }
+  thead th {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 600;
+    text-align: left;
+    padding: 12px 14px; border-bottom: 1px solid var(--line-soft);
+    background: var(--bg-soft);
+    position: sticky; top: 0;
+  }
+  thead th.sortable { cursor: pointer; user-select: none; }
+  thead th.sortable:hover { color: var(--ink); }
+  thead th .arrow { display: inline-block; opacity: 0; margin-left: 4px; transition: opacity 100ms; }
+  thead th.sorted .arrow { opacity: 1; color: var(--accent); }
+  tbody td {
+    padding: 12px 14px; border-bottom: 1px solid var(--line-soft);
+    font-size: 13px; color: var(--ink); vertical-align: middle;
+  }
+  tbody tr { transition: background 120ms; }
+  tbody tr:hover { background: var(--bg-soft); }
+  tbody tr.editing { background: var(--accent-soft); }
+  td .primary-text { font-weight: 600; }
+  td .secondary-text { font-size: 11px; color: var(--ink-mute); margin-top: 2px; font-family: var(--font-mono); }
+
+  /* status pill / inline select */
+  .stage-select {
+    appearance: none;
+    padding: 4px 24px 4px 10px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'><path d='M1 1l3 3 3-3' stroke='currentColor' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 8px center;
+    cursor: pointer; min-width: 96px;
+    transition: filter 100ms;
+  }
+  .stage-select:hover { filter: brightness(.95); }
+  .stage-select.pending  { background-color: var(--st-pending-bg); color: var(--st-pending); }
+  .stage-select.active   { background-color: var(--st-active-bg);  color: var(--st-active);  }
+  .stage-select.done     { background-color: var(--st-done-bg);    color: var(--st-done);    }
+  .stage-select.late     { background-color: var(--st-late-bg);    color: var(--st-late);    }
+
+  /* row actions */
+  .row-actions {
+    display: flex; gap: 6px; opacity: 0; transition: opacity 120ms;
+  }
+  tbody tr:hover .row-actions { opacity: 1; }
+  .row-actions button {
+    padding: 5px 10px; font-size: 11px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--fbspl-white);
+    font-weight: 500; color: var(--ink-soft);
+  }
+  .row-actions button:hover { border-color: var(--ink); color: var(--ink); }
+  .row-actions button.danger:hover { border-color: var(--st-late); color: var(--st-late); }
+
+  .empty {
+    padding: 64px 24px; text-align: center; color: var(--ink-mute);
+  }
+  .empty .ico {
+    font-family: var(--font-display); font-size: 64px; opacity: .25; line-height: 1;
+    margin-bottom: 12px;
+  }
+  .empty h3 { font-family: var(--font-display); margin: 0 0 6px; color: var(--ink); }
+  .empty p { font-size: 13px; margin: 0; }
+
+  /* ===================== EDIT MODAL ===================== */
+  .modal-veil {
+    position: fixed; inset: 0; background: rgba(0,0,0,.4);
+    backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 24px;
+  }
+  .modal-veil.show { display: flex; }
+  .modal {
+    background: var(--bg-card); border-radius: 16px;
+    width: 100%; max-width: 640px; max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-3);
+  }
+  .modal-head {
+    padding: 24px 28px 16px; border-bottom: 1px solid var(--line-soft);
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  }
+  .modal-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0 0 2px; letter-spacing: -.01em; }
+  .modal-head .sub { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .08em; }
+  .modal-head .close {
+    background: transparent; border: none; padding: 6px; font-size: 22px; cursor: pointer; color: var(--ink-mute);
+    line-height: 1;
+  }
+  .modal-head .close:hover { color: var(--ink); }
+  .modal-body { padding: 24px 28px; }
+  .modal-body .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .modal-body .field-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .modal-foot {
+    padding: 16px 28px 22px; border-top: 1px solid var(--line-soft);
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .modal-foot .left button { color: var(--st-late); border-color: transparent; }
+  .modal-foot .left button:hover { border-color: var(--st-late); background: var(--st-late-bg); }
+  .modal-foot .right { display: flex; gap: 8px; }
+
+  /* ===================== TOAST ===================== */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: var(--ink); color: var(--fbspl-white);
+    padding: 14px 22px; border-radius: 12px;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 500;
+    box-shadow: var(--shadow-3);
+    transition: transform 280ms cubic-bezier(.22,1,.36,1);
+    z-index: 300;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .toast::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--fbspl-soft); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.err::before { background: var(--st-late-bg); }
+
+  .loading {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid rgba(255,255,255,.32); border-top-color: var(--fbspl-white);
+    border-radius: 50%; animation: spin .7s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 1100px) {
+    main { grid-template-columns: 1fr; padding: 24px 20px 80px; gap: 24px; }
+    .add-card { position: static; }
+    .stats-strip { grid-template-columns: repeat(3, 1fr); padding: 24px 20px 0; }
+    .hero-inner { padding: 40px 20px 44px; }
+    .head-row { padding: 14px 20px; }
+    .modal-body .field-row, .modal-body .field-row-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    tbody td, thead th { padding: 10px 8px; font-size: 12px; }
+  }
+
+  /* ===================== PRIMARY TAB NAV ===================== */
+  .tab-nav {
+    display: flex; gap: 4px;
+    background: rgba(0,0,0,.04);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  .tab-nav button {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ink-soft);
+    padding: 7px 18px;
+    font-size: 13px; font-weight: 600;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all 140ms cubic-bezier(.2,.7,.2,1);
+    letter-spacing: 0;
+  }
+  .tab-nav button:hover { color: var(--ink); }
+  .tab-nav button.active {
+    background: var(--fbspl-white);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  }
+  .tab-nav button .tab-count {
+    display: inline-block; margin-left: 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 1px 7px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+    font-weight: 700;
+    vertical-align: 1px;
+  }
+  .tab-nav button.active .tab-count { background: var(--accent); color: var(--fbspl-white); }
+
+  /* Settings-only meta indicators (ver-line, save-state, conn dot already shared) */
+  .ver-line { color: var(--ink-mute); }
+  .ver-line b { color: var(--ink); font-weight: 600; }
+  .save-state {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--accent-soft);
+    border-radius: 999px;
+    color: var(--accent);
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  .save-state.unsaved { background: var(--ink); color: var(--fbspl-white); }
+  .status-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,44,206,.18);
+  }
+  .save-state.unsaved .status-dot { background: var(--fbspl-soft); }
+
+  /* ===================== VIEW SWITCHING ===================== */
+  /* Hide views that don't match the active one */
+  body[data-active-view="clients"]  :is(.view-settings, .view-email),
+  body[data-active-view="settings"] :is(.view-clients,  .view-email),
+  body[data-active-view="email"]    :is(.view-clients,  .view-settings) {
+    display: none !important;
+  }
+  /* Hide topbar elements that don't match the active view */
+  body[data-active-view="clients"]  :is(.settings-only, .email-only),
+  body[data-active-view="settings"] :is(.clients-only,  .email-only),
+  body[data-active-view="email"]    :is(.clients-only,  .settings-only) {
+    display: none !important;
+  }
+  /* config-only: shows on settings & email, hides on clients */
+  body[data-active-view="clients"] .config-only { display: none !important; }
+
+  /* ===================== SETTINGS VIEW STYLES ===================== */
+  /* Settings hero pill row */
+  .view-settings .hero .pill-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px;
+  }
+  .view-settings .hero .pill {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--fbspl-white);
+    border: 1px solid rgba(255,255,255,.32);
+    border-radius: 999px; padding: 6px 12px;
+  }
+
+  /* Settings main grid */
+  .view-settings main {
+    max-width: 1280px; margin: 0 auto;
+    padding: 40px 48px 100px;
+    display: grid; grid-template-columns: 240px 1fr; gap: 48px;
+  }
+
+  /* Settings side nav */
+  .view-settings nav.side { position: sticky; top: 96px; align-self: start; }
+  .view-settings nav.side h3 {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 0 0 12px;
+  }
+  .view-settings nav.side ul { list-style: none; padding: 0; margin: 0 0 28px; }
+  .view-settings nav.side li a {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px;
+    font-size: 14px; color: var(--ink-soft);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+    border: 1px solid transparent;
+  }
+  .view-settings nav.side li a:hover { color: var(--ink); background: var(--accent-soft); }
+  .view-settings nav.side li a.active {
+    color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+  .view-settings nav.side li a span.idx {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute);
+  }
+  .view-settings nav.side li a.active span.idx { color: var(--accent); }
+
+  /* Settings sections (cards) */
+  :is(.view-settings, .view-email) .section {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-1);
+    scroll-margin-top: 96px;
+    position: relative;
+    transition: border-color 220ms, box-shadow 220ms;
+  }
+  :is(.view-settings, .view-email) .section:hover { border-color: rgba(0,44,206,.3); box-shadow: var(--shadow-2); }
+  :is(.view-settings, .view-email) .section-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--line-soft);
+    padding-bottom: 16px;
+  }
+  :is(.view-settings, .view-email) .section-head .title-wrap { display: flex; align-items: baseline; gap: 14px; }
+  :is(.view-settings, .view-email) .section-head .num {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
+    color: var(--ink-mute); border: 1px solid var(--line);
+    padding: 4px 8px; border-radius: 4px; text-transform: uppercase; flex-shrink: 0;
+  }
+  :is(.view-settings, .view-email) .section-head h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 26px; margin: 0;
+    letter-spacing: -.01em; line-height: 1.1; color: var(--ink);
+  }
+  :is(.view-settings, .view-email) .section-head .badge {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 6px 10px; border-radius: 999px; flex-shrink: 0;
+  }
+  :is(.view-settings, .view-email) .section-desc {
+    font-size: 14px; color: var(--ink-soft); margin: 12px 0 24px;
+    max-width: 64ch; line-height: 1.55;
+  }
+  :is(.view-settings, .view-email) .field { margin-bottom: 22px; }
+  :is(.view-settings, .view-email) .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  :is(.view-settings, .view-email) input[type="text"],
+  :is(.view-settings, .view-email) input[type="email"],
+  :is(.view-settings, .view-email) input[type="number"],
+  :is(.view-settings, .view-email) input[type="url"],
+  :is(.view-settings, .view-email) textarea,
+  :is(.view-settings, .view-email) select {
+    padding: 11px 14px;
+    border-radius: 10px;
+  }
+  :is(.view-settings, .view-email) textarea {
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65;
+    resize: vertical; min-height: 120px;
+  }
+  :is(.view-settings, .view-email) textarea.html { min-height: 280px; }
+
+  /* Token chips */
+  :is(.view-settings, .view-email) .tokens {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+  }
+  :is(.view-settings, .view-email) .tokens .tok {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    background: var(--accent-soft); color: var(--accent);
+    padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    user-select: none; border: 1px solid transparent;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+  }
+  :is(.view-settings, .view-email) .tokens .tok:hover {
+    background: var(--accent); color: var(--fbspl-white);
+    transform: translateY(-1px);
+  }
+  :is(.view-settings, .view-email) .tokens .tok:active { transform: translateY(0); }
+
+  /* Save toolbar */
+  :is(.view-settings, .view-email) .toolbar {
+    position: sticky; bottom: 16px; z-index: 10;
+    margin-top: 32px;
+    background: var(--ink); color: var(--fbspl-white);
+    border: 1px solid var(--ink);
+    border-radius: 16px;
+    padding: 16px 22px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    box-shadow: var(--shadow-3);
+  }
+  :is(.view-settings, .view-email) .toolbar .info {
+    font-size: 13px; color: rgba(255,255,255,.72);
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono);
+  }
+  :is(.view-settings, .view-email) .toolbar .info .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px;
+    background: var(--fbspl-soft); color: var(--accent);
+    font-weight: 700; font-size: 12px;
+    border-radius: 999px; padding: 0 8px;
+  }
+  :is(.view-settings, .view-email) .toolbar .info.clean .count-badge {
+    background: rgba(255,255,255,.16); color: rgba(255,255,255,.92);
+  }
+  :is(.view-settings, .view-email) .toolbar .btn-row { display: flex; gap: 8px; }
+  :is(.view-settings, .view-email) .toolbar button.primary {
+    background: var(--fbspl-white); color: var(--ink); border-color: var(--fbspl-white);
+  }
+  :is(.view-settings, .view-email) .toolbar button.primary:hover {
+    background: var(--fbspl-soft); border-color: var(--fbspl-soft);
+  }
+  :is(.view-settings, .view-email) .toolbar button.ghost {
+    background: transparent; color: var(--fbspl-white);
+    border-color: rgba(255,255,255,.32);
+  }
+  :is(.view-settings, .view-email) .toolbar button.ghost:hover {
+    border-color: var(--fbspl-white); background: rgba(255,255,255,.06);
+  }
+  :is(.view-settings, .view-email) .toolbar button.primary .loading {
+    border-color: rgba(0,0,0,.16); border-top-color: var(--ink);
+  }
+
+  .view-settings .inline-schedule {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+
+  /* Attachment field */
+  :is(.view-settings, .view-email) .attach {
+    margin: 16px 0 18px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, #F8F8FF, #F1F1FF);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  :is(.view-settings, .view-email) .attach .icon {
+    flex-shrink: 0; width: 36px; height: 36px;
+    background: var(--fbspl-white);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    color: var(--accent);
+  }
+  :is(.view-settings, .view-email) .attach .icon svg { width: 18px; height: 18px; }
+  :is(.view-settings, .view-email) .attach .body { flex: 1; min-width: 0; }
+  :is(.view-settings, .view-email) .attach .top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 6px;
+  }
+  :is(.view-settings, .view-email) .attach .lbl {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-soft); font-weight: 500;
+  }
+  :is(.view-settings, .view-email) .attach .pill-optional {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-mute);
+    border: 1px solid var(--line);
+    padding: 2px 7px; border-radius: 999px;
+  }
+  :is(.view-settings, .view-email) .attach input[type="url"] {
+    background: var(--fbspl-white);
+    font-family: var(--font-mono); font-size: 12.5px;
+    padding: 9px 12px;
+  }
+  :is(.view-settings, .view-email) .attach .hint-line {
+    font-size: 12px; color: var(--ink-mute);
+    margin-top: 6px; line-height: 1.5;
+  }
+  :is(.view-settings, .view-email) .attach .hint-line a {
+    color: var(--accent); text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+  }
+  :is(.view-settings, .view-email) .attach .hint-line a:hover { border-bottom-style: solid; }
+
+  /* Live preview */
+  :is(.view-settings, .view-email) details.preview {
+    margin-top: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-soft);
+  }
+  :is(.view-settings, .view-email) details.preview summary {
+    padding: 10px 14px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ink-soft); letter-spacing: .12em; text-transform: uppercase;
+    list-style: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 120ms;
+  }
+  :is(.view-settings, .view-email) details.preview summary:hover { background: var(--accent-soft); }
+  :is(.view-settings, .view-email) details.preview summary::-webkit-details-marker { display: none; }
+  :is(.view-settings, .view-email) details.preview summary::before {
+    content: '▸'; color: var(--accent);
+    transition: transform 120ms; display: inline-block;
+  }
+  :is(.view-settings, .view-email) details.preview[open] summary::before { transform: rotate(90deg); }
+  :is(.view-settings, .view-email) .preview-body {
+    border-top: 1px solid var(--line);
+    padding: 18px 20px;
+    background: var(--fbspl-white);
+    font-family: var(--font-sans);
+    font-size: 14px; line-height: 1.6; color: var(--ink-soft);
+    max-height: 640px; overflow-y: auto;
+  }
+  :is(.view-settings, .view-email) .preview-body .pv-subj {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    color: var(--ink); margin-bottom: 12px;
+    border-bottom: 1px solid var(--line-soft); padding-bottom: 10px;
+    letter-spacing: -.005em;
+  }
+  :is(.view-settings, .view-email) .preview-body .pv-iframe {
+    width: 100%; min-height: 480px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f4f4f4; display: block;
+  }
+  :is(.view-settings, .view-email) .preview-body p { margin: 0 0 10px; }
+  :is(.view-settings, .view-email) .preview-body strong { color: var(--ink); }
+  :is(.view-settings, .view-email) .preview-body ul { margin: 8px 0 12px; padding-left: 22px; }
+  :is(.view-settings, .view-email) .preview-body li { margin: 4px 0; color: var(--ink-soft); }
+  :is(.view-settings, .view-email) .preview-body a { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .view-settings main { grid-template-columns: 1fr; padding: 24px 20px 80px; gap: 24px; }
+    .view-settings nav.side { position: static; }
+    .view-settings nav.side ul { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+    .view-settings nav.side li a { padding: 6px 10px; }
+    :is(.view-settings, .view-email) .field-row, .view-settings .inline-schedule { grid-template-columns: 1fr; }
+    :is(.view-settings, .view-email) .section { padding: 24px 22px; border-radius: 12px; }
+    :is(.view-settings, .view-email) .section-head { flex-direction: column; gap: 8px; }
+  }
+  @media (max-width: 900px) {
+    /* Header wraps cleanly: brand on row 1 (with tab nav), meta on row 2 */
+    .head-row { flex-wrap: wrap; row-gap: 10px; padding: 12px 16px !important; gap: 12px; }
+    .brand { flex: 1 1 auto; min-width: 0; }
+    .brand img.logo { height: 22px; }
+    .brand-meta .product { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .tab-nav { flex: 0 0 auto; order: 1; }
+    .head-meta { flex: 1 1 100%; order: 3; justify-content: flex-start; gap: 8px; flex-wrap: wrap; }
+  }
+  @media (max-width: 700px) {
+    .tab-nav button { padding: 6px 12px; font-size: 12px; }
+  }
+
+
+  /* ===================== EMAIL EDITOR VIEW ===================== */
+  /* Hero pills mirror the settings hero treatment */
+  .view-email .hero .pill-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px;
+  }
+  .view-email .hero .pill {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--fbspl-white);
+    border: 1px solid rgba(255,255,255,.32);
+    border-radius: 999px; padding: 6px 12px;
+  }
+
+  /* Two-column layout: template list + editor pane */
+  .view-email main.ee-main {
+    max-width: 1440px; margin: 0 auto;
+    padding: 40px 48px 100px;
+    display: grid; grid-template-columns: 280px 1fr; gap: 40px;
+  }
+
+  /* --- Template list (left rail) --- */
+  .ee-tplnav { position: sticky; top: 96px; align-self: start; }
+  .ee-tplnav h3 {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 0 0 12px;
+  }
+  .ee-tpllist { list-style: none; padding: 0; margin: 0 0 24px; }
+  .ee-tpllist li { margin: 0; }
+  .ee-tpllist button {
+    width: 100%;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: transparent; border: 1px solid transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-sans); font-size: 14px;
+    text-align: left;
+    border-radius: 8px; cursor: pointer;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+  }
+  .ee-tpllist button:hover { color: var(--ink); background: var(--accent-soft); }
+  .ee-tpllist button.active {
+    background: var(--accent-soft); color: var(--accent); font-weight: 700;
+    border-color: rgba(0,44,206,.18);
+  }
+  .ee-tpllist button .ee-idx {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ink-mute); flex-shrink: 0;
+  }
+  .ee-tpllist button.active .ee-idx { color: var(--accent); }
+  .ee-tpllist button .ee-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint);
+    flex-shrink: 0; margin-left: auto;
+  }
+  .ee-tpllist button.dirty .ee-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(0,44,206,.16); }
+  .ee-tpllist .ee-tpl-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* --- Cheatsheet --- */
+  .ee-cheat {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 8px;
+  }
+  .ee-cheat h4 {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 0 0 10px;
+  }
+  .ee-cheat ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .ee-cheat li { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .ee-cheat li code {
+    font-family: var(--font-mono); font-size: 11px;
+    background: var(--fbspl-white); color: var(--accent);
+    padding: 2px 7px; border-radius: 5px; border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .ee-cheat li span { color: var(--ink-mute); font-size: 11.5px; }
+
+  /* --- Right pane --- */
+  .ee-pane { min-width: 0; }
+  .ee-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-1);
+  }
+  .ee-meta-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--line-soft);
+    padding-bottom: 16px;
+  }
+  .ee-meta-head .ee-tag {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 6px;
+  }
+  .ee-meta-head h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 26px; margin: 0;
+    letter-spacing: -.01em; line-height: 1.1; color: var(--ink);
+  }
+  .ee-meta-head .ee-badge {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 6px 10px; border-radius: 999px; flex-shrink: 0; white-space: nowrap;
+  }
+  .ee-meta-desc {
+    font-size: 14px; color: var(--ink-soft); margin: 12px 0 0;
+    max-width: 64ch; line-height: 1.55;
+  }
+
+  .ee-field { margin-bottom: 18px; }
+  .ee-field label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 8px;
+  }
+  .ee-field label .hint {
+    font-family: var(--font-sans); font-size: 11px; color: var(--ink-faint);
+    text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 6px;
+  }
+  .ee-field input[type="text"], .ee-field input[type="url"] {
+    padding: 11px 14px; border-radius: 10px;
+  }
+  .ee-tokens { margin-bottom: 0; }
+  .ee-tokens .tok {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    background: var(--accent-soft); color: var(--accent);
+    padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    user-select: none; border: 1px solid transparent;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+  }
+  .ee-tokens .tok:hover {
+    background: var(--accent); color: var(--fbspl-white);
+    transform: translateY(-1px);
+  }
+  .ee-tokens .tok:active { transform: translateY(0); }
+  .ee-tokens { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* Mode tabs (Plain text / HTML) */
+  .ee-modes {
+    display: inline-flex; gap: 2px; padding: 3px;
+    background: var(--bg-soft); border: 1px solid var(--line);
+    border-radius: 10px; margin-bottom: 12px;
+  }
+  .ee-modes button {
+    background: transparent; border: none; color: var(--ink-mute);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+  }
+  .ee-modes button:hover { color: var(--ink); }
+  .ee-modes button.active {
+    background: var(--fbspl-white); color: var(--accent); font-weight: 700;
+    box-shadow: var(--shadow-1);
+  }
+
+  /* Editor + preview split */
+  .ee-split {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-top: 8px;
+  }
+  .ee-editor-col, .ee-preview-col {
+    display: flex; flex-direction: column; min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--fbspl-white);
+  }
+  .ee-col-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--line);
+  }
+  .ee-col-head .ee-col-title {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft);
+  }
+
+  /* Formatting toolbar inside editor column */
+  .ee-fmtbar { display: flex; gap: 2px; }
+  .ee-fmtbar button {
+    background: transparent; border: 1px solid transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+    min-width: 28px; height: 28px; padding: 0 7px;
+    border-radius: 6px; cursor: pointer;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+  }
+  .ee-fmtbar button:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(0,44,206,.18); }
+  .ee-fmtbar button:active { transform: scale(0.96); }
+  .ee-fmtbar .ee-fmt-sep { width: 1px; align-self: stretch; background: var(--line); margin: 4px 4px; }
+
+  /* The plain-text editor textarea */
+  textarea.ee-source, textarea.ee-rawhtml {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    padding: 18px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px; line-height: 1.7;
+    min-height: 480px; resize: vertical;
+    color: var(--ink);
+    background: var(--fbspl-white);
+  }
+  textarea.ee-source:focus, textarea.ee-rawhtml:focus {
+    outline: none; box-shadow: inset 0 0 0 2px var(--accent-soft);
+  }
+
+  /* Preview frame */
+  .ee-preview-toggle { display: flex; gap: 2px; }
+  .ee-preview-toggle button {
+    background: transparent; border: 1px solid transparent;
+    color: var(--ink-mute);
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 6px; cursor: pointer;
+    transition: all 120ms;
+  }
+  .ee-preview-toggle button:hover { color: var(--ink); background: var(--accent-soft); }
+  .ee-preview-toggle button.active {
+    color: var(--accent); background: var(--accent-soft);
+    border-color: rgba(0,44,206,.24);
+  }
+  .ee-preview-wrap {
+    flex: 1;
+    background: #f4f4f4;
+    padding: 18px;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 480px;
+    overflow: auto;
+  }
+  .ee-preview-subj {
+    width: 100%; max-width: 600px;
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    margin-bottom: 10px;
+    padding: 8px 14px;
+    background: var(--fbspl-white);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    letter-spacing: -.005em;
+  }
+  .ee-preview-subj span {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-mute); margin-right: 8px; font-weight: 400;
+  }
+  iframe.ee-iframe {
+    width: 100%; max-width: 600px;
+    min-height: 480px; flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f4f4f4; display: block;
+    transition: max-width 220ms ease;
+  }
+  iframe.ee-iframe.mobile { max-width: 380px; }
+
+  /* Tablet & smaller — collapse split to stack */
+  @media (max-width: 1100px) {
+    .ee-split { grid-template-columns: 1fr; }
+    .ee-preview-wrap { padding: 14px; min-height: 380px; }
+    iframe.ee-iframe { min-height: 380px; }
+  }
+  @media (max-width: 900px) {
+    .view-email main.ee-main { grid-template-columns: 1fr; padding: 24px 20px 80px; gap: 24px; }
+    .ee-tplnav { position: static; }
+    .ee-tpllist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 16px; }
+    .ee-card { padding: 22px 20px; }
+    .ee-meta-head { flex-direction: column; gap: 8px; }
+  }
+
+  /* Document sub-card — visually adjacent to the email card but signals
+     "this is the attachment, not the email itself" via a left-edge accent. */
+  .ee-doc-card {
+    border-top: 3px solid #9C2A2A;
+    background: linear-gradient(180deg, #FFFCFC 0%, #FFFFFF 60%);
+    position: relative;
+  }
+  .ee-doc-card::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: 28px;
+    width: 20px; height: 20px;
+    background: #9C2A2A;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #FFFFFF, 0 0 0 5px #FBE6E6;
+  }
+  .ee-doc-card::after {
+    content: '📎';
+    position: absolute;
+    top: -10px; left: 28px;
+    width: 20px; height: 20px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 11px;
+    z-index: 1;
+  }
+  .ee-doc-badge {
+    background: #FBE6E6 !important;
+    color: #9C2A2A !important;
+  }
+  /* The doc card's textarea uses serif-friendly mono font — it's HTML for
+     a legal document, code-like editing is the right primitive. */
+  .ee-doc-card textarea.ee-rawhtml {
+    min-height: 360px;
+  }
+
+  /* Attachment upload UI */
+  .attach-uploader {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 10px;
+  }
+  .attach-uploader .upload-btn {
+    background: var(--fbspl-white);
+    border: 1px solid var(--line);
+    color: var(--accent);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 120ms cubic-bezier(.2,.7,.2,1);
+    display: inline-flex; align-items: center;
+  }
+  .attach-uploader .upload-btn:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .attach-uploader .upload-btn:disabled {
+    opacity: .55; cursor: progress;
+  }
+  .upload-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .upload-status.ok { color: #1F7A3D; }
+  .upload-status.err { color: #9C2A2A; }
+
+</style>
+</head>
+<body data-active-view="clients">
+
+<header>
+  <div class="head-row">
+    <div class="brand">
+      <img class="logo" src="assets/fbspl-logo-horizontal-blue.svg" alt="FBSPL" />
+      <div class="sep"></div>
+      <div class="brand-meta">
+        <span class="brand-mark">AOS · Workflow Console</span>
+        <span class="product" id="brandProduct">Audit client database</span>
+      </div>
+    </div>
+
+    <nav class="tab-nav" id="tabNav" role="tablist" aria-label="Console views">
+      <button data-tab="clients" class="active" role="tab" aria-selected="true">
+        Clients <span class="tab-count" id="tabCountClients">0</span>
+      </button>
+      <button data-tab="settings" role="tab" aria-selected="false">
+        Settings
+      </button>
+      <button data-tab="email" role="tab" aria-selected="false">
+        Email Editor <span class="tab-count" id="tabCountEmail">12</span>
+      </button>
+    </nav>
+
+    <div class="head-meta">
+      <span class="conn-state" id="connState" title="Live connection to Supabase">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connText">connecting…</span>
+      </span>
+      <button class="ghost clients-only" id="refreshBtn" style="padding:6px 12px;font-size:12px;">Refresh</button>
+      <span class="ver-line config-only">v<b id="versionTag">—</b> · saved <b id="lastSaved">—</b></span>
+      <span class="save-state config-only" id="saveState">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">All changes saved</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="view view-clients">
+<section class="hero">
+  <img class="phoenix" src="assets/fbspl-icon-phoenix-white.svg" alt="" aria-hidden="true" />
+  <div class="hero-inner">
+    <div class="overline">FBSPL · Audit operations · Client repository</div>
+    <h1>Audit client<br><span class="accent">database</span></h1>
+    <p class="lede">Single source of truth for every agency in flight. Add a row here and the AOS onboarding workflow fires automatically — first email out within sixty seconds. Stage dropdowns sync back so the cron knows what's still overdue.</p>
+  </div>
+</section>
+
+<div class="stats-strip">
+  <div class="stat"><div class="label">Total clients</div><div class="value" id="statTotal">—</div><div class="sub" id="statTotalSub">in repository</div></div>
+  <div class="stat"><div class="label">New this week</div><div class="value" id="statNew">—</div><div class="sub">started onboarding</div></div>
+  <div class="stat"><div class="label">NDA pending</div><div class="value" id="statNda">—</div><div class="sub">awaiting signature</div></div>
+  <div class="stat"><div class="label">Invoices unpaid</div><div class="value" id="statInv">—</div><div class="sub">past due or open</div></div>
+  <div class="stat"><div class="label">AMS pending</div><div class="value" id="statAms">—</div><div class="sub">credentials missing</div></div>
+  <div class="stat"><div class="label">Completed</div><div class="value muted" id="statDone">—</div><div class="sub">all stages done</div></div>
+</div>
+
+<main>
+  <!-- ADD NEW CLIENT FORM -->
+  <aside class="add-card">
+    <h2>Add new client</h2>
+    <p class="sub">Saving here writes one row to Supabase. The onboarding workflow picks it up via Database Webhook within ~60 seconds.</p>
+
+    <div class="field">
+      <label>Agency name <span class="req">*</span></label>
+      <input type="text" id="f_agency_name" placeholder="Gordon Wood Insurance" required />
+    </div>
+    <div class="field">
+      <label>Primary contact <span class="req">*</span></label>
+      <input type="text" id="f_agency_contact_name" placeholder="Sarah Mitchell" required />
+    </div>
+    <div class="field">
+      <label>Contact email <span class="req">*</span></label>
+      <input type="email" id="f_email" placeholder="sarah@gordonwoodins.com" required />
+    </div>
+    <div class="field">
+      <label>Audit start date <span class="req">*</span></label>
+      <input type="date" id="f_audit_start_date" required />
+    </div>
+    <div class="field">
+      <label>Discovery call <span class="hint">optional</span></label>
+      <input type="date" id="f_discovery_call_date" />
+    </div>
+    <div class="field">
+      <label>Project type <span class="hint">optional</span></label>
+      <input type="text" id="f_project_type" placeholder="Operational Audit" />
+    </div>
+    <div class="field">
+      <label>Engagement revenue <span class="hint">optional, USD</span></label>
+      <input type="number" id="f_revenue" placeholder="0" min="0" step="100" />
+    </div>
+    <div class="field">
+      <label>Notes <span class="hint">internal only</span></label>
+      <textarea id="f_notes" placeholder="Source, referrer, special considerations…"></textarea>
+    </div>
+
+    <div class="actions">
+      <span class="note">Fires onboarding chain on save</span>
+      <button class="primary" id="addBtn">Add client</button>
+    </div>
+  </aside>
+
+  <!-- CLIENTS TABLE -->
+  <div class="clients-card">
+    <div class="clients-head">
+      <div class="title-wrap">
+        <h2>Active clients</h2>
+        <span class="count" id="visCount">0 visible</span>
+      </div>
+      <div class="filters">
+        <input type="text" id="searchBox" placeholder="Search agency, contact, email…" />
+        <select id="filterStage">
+          <option value="">All stages</option>
+          <option value="New">New</option>
+          <option value="Onboarding Started">Onboarding Started</option>
+          <option value="All Onboarding Emails Sent">Emails Sent</option>
+          <option value="Audit In Progress">Audit In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <select id="filterNda">
+          <option value="">NDA: any</option>
+          <option value="Pending">Pending</option>
+          <option value="Sent">Sent</option>
+          <option value="Signed">Signed</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+        <select id="filterInv">
+          <option value="">Invoice: any</option>
+          <option value="Pending">Pending</option>
+          <option value="Sent">Sent</option>
+          <option value="Paid">Paid</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+        <select id="filterAms">
+          <option value="">AMS: any</option>
+          <option value="Pending">Pending</option>
+          <option value="Requested">Requested</option>
+          <option value="Received">Received</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+        <button class="ghost" id="clearFiltersBtn">Clear</button>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table id="clientsTable">
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="agency_name">Agency <span class="arrow">↓</span></th>
+            <th>Contact</th>
+            <th class="sortable" data-sort="audit_start_date">Audit start <span class="arrow">↓</span></th>
+            <th>NDA</th>
+            <th>Invoice</th>
+            <th>AMS</th>
+            <th>Stage</th>
+            <th style="width:90px;text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="clientsBody">
+          <tr><td colspan="8" class="empty"><div class="ico">∅</div><h3>Loading…</h3><p>Reading from Supabase.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+</div>
+
+<div class="view view-settings">
+<section class="hero">
+  <img class="phoenix" src="assets/fbspl-icon-phoenix-white.svg" alt="" aria-hidden="true" />
+  <div class="hero-inner">
+    <div class="overline">FBSPL · Audit operations · n8n workflow</div>
+    <h1>Workflow<br><span class="accent">settings</span></h1>
+    <p class="lede">Identity, reminder cadences, and external integrations for the AOS audit onboarding workflow. Email templates live in the <strong style="color:#fff;">Email Editor</strong> tab — they share the same save action as this page.</p>
+    <div class="pill-row">
+      <span class="pill">3 sections</span>
+      <span class="pill">9 cadence controls</span>
+      <span class="pill">Daily cron</span>
+      <span class="pill">ISO 27001</span>
+    </div>
+  </div>
+</section>
+<main>
+  <nav class="side">
+    <h3>Sections</h3>
+    <ul id="navList">
+      <li><a href="#general" data-target="general"><span>General</span><span class="idx">01</span></a></li>
+      <li><a href="#schedule" data-target="schedule"><span>Cadence</span><span class="idx">02</span></a></li>
+      <li><a href="#integrations" data-target="integrations"><span>Integrations</span><span class="idx">03</span></a></li>
+    </ul>
+    <h3>Actions</h3>
+    <ul>
+      <li><a href="#" id="exportBtn"><span>Export JSON</span><span class="idx">↓</span></a></li>
+      <li><a href="#" id="importBtn"><span>Import JSON</span><span class="idx">↑</span></a></li>
+      <li><a href="#" id="resetBtn"><span>Reset defaults</span><span class="idx">⟲</span></a></li>
+    </ul>
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);line-height:1.5;margin-top:18px;padding:12px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;">
+      Email subjects and bodies have moved to the <strong style="color:var(--accent);font-family:var(--font-sans);font-weight:700;">Email Editor</strong> tab.
+    </p>
+  </nav>
+
+  <div id="form">
+    <!-- GENERAL -->
+    <section class="section" id="general">
+      <div class="section-head">
+        <div class="title-wrap"><span class="num">01</span><h2>General</h2></div>
+        <span class="badge">Global</span>
+      </div>
+      <p class="section-desc">Identity values used across every email sent by the workflow. These tokens fill into <code style="font-family:var(--font-mono);background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:12.5px;">{{Sender_Name}}</code> and <code style="font-family:var(--font-mono);background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:12.5px;">{{Title}}</code> automatically.</p>
+      <div class="field-row">
+        <div class="field">
+          <label>Sender display name</label>
+          <input type="text" data-key="sender_name" placeholder="Laura Waldyn" />
+        </div>
+        <div class="field">
+          <label>Sender title <span class="hint">used in email signatures</span></label>
+          <input type="text" data-key="title" placeholder="AOS Audit Lead" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Reply-to email</label>
+          <input type="email" data-key="reply_to" placeholder="laura@aosaudit.com" />
+        </div>
+        <div class="field">
+          <label>Project Lead email <span class="hint">notified on overdue items</span></label>
+          <input type="email" data-key="project_lead_email" placeholder="projectlead@aosaudit.com" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>CC on interview emails</label>
+          <input type="email" data-key="interview_cc" placeholder="saurabh.sakkarwal@fbspl.com" />
+        </div>
+        <div class="field">
+          <label>Accounting Team emails <span class="hint">comma-separated · cc'd on payment notifications</span></label>
+          <input type="text" data-key="accounting_emails" placeholder="accounting@fbspl.com, finance@fbspl.com" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section class="section" id="schedule">
+      <div class="section-head">
+        <div class="title-wrap"><span class="num">02</span><h2>Cadence &amp; Audit-Relative Timing</h2></div>
+        <span class="badge">Cadence</span>
+      </div>
+      <p class="section-desc">All scheduling is anchored to each client's <strong>Audit Start Date</strong> column in the P&amp;L sheet. The cron job runs daily, computes <code style="font-family:var(--font-mono);background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:12px;">days_to_audit = audit_start − today</code>, and fires the appropriate email when the threshold is reached.</p>
+
+      <label style="display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-mute); margin:8px 0 12px;">Audit-Relative Delivery</label>
+      <div class="inline-schedule" style="margin-bottom:24px;">
+        <div class="field">
+          <label>Invoice lead days <span class="hint">before audit start</span></label>
+          <input type="number" data-key="invoice_lead_days" min="1" max="30" />
+        </div>
+        <div class="field">
+          <label>AMS request lead days <span class="hint">before audit start</span></label>
+          <input type="number" data-key="ams_lead_days" min="1" max="30" />
+        </div>
+        <div class="field">
+          <label>Internal payment alert lead days <span class="hint">notify Project Lead + Accounting</span></label>
+          <input type="number" data-key="payment_alert_lead_days" min="1" max="30" />
+        </div>
+      </div>
+
+      <label style="display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-mute); margin:8px 0 12px;">Post-Send Overdue Reminders</label>
+      <div class="inline-schedule">
+        <div class="field">
+          <label>NDA overdue after (days)</label>
+          <input type="number" data-key="nda_overdue_days" min="1" max="30" />
+        </div>
+        <div class="field">
+          <label>Invoice overdue after (days)</label>
+          <input type="number" data-key="invoice_overdue_days" min="1" max="30" />
+        </div>
+        <div class="field">
+          <label>AMS overdue after (days)</label>
+          <input type="number" data-key="ams_overdue_days" min="1" max="30" />
+        </div>
+        <div class="field">
+          <label>Interview no-response (days)</label>
+          <input type="number" data-key="interview_pending_days" min="1" max="14" />
+        </div>
+        <div class="field">
+          <label>Cron check frequency (days)</label>
+          <input type="number" data-key="cron_interval_days" min="1" max="14" />
+        </div>
+        <div class="field">
+          <label>Cron run hour (0–23)</label>
+          <input type="number" data-key="cron_hour" min="0" max="23" />
+        </div>
+      </div>
+    </section>
+
+    <!-- INTEGRATIONS -->
+    <section class="section" id="integrations">
+      <div class="section-head">
+        <div class="title-wrap"><span class="num">03</span><h2>Integrations</h2></div>
+        <span class="badge">External</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>SweetProcess API token</label>
+          <input type="text" data-key="sweetprocess_token" placeholder="Token …" />
+        </div>
+        <div class="field">
+          <label>SweetProcess SOP name template</label>
+          <input type="text" data-key="sweetprocess_sop_template" placeholder="{{Agency_Name}} - AOS SOP" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Google Sheet ID (P&amp;L tracker)</label>
+          <input type="text" data-key="sheet_id" />
+        </div>
+        <div class="field">
+          <label>Sheet tab to watch</label>
+          <input type="text" data-key="sheet_tab" placeholder="Revenue Sheet 2026" />
+        </div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <div class="info clean" id="dirtyInfo">
+        <span class="count-badge" id="dirtyCount">0</span>
+        <span id="dirtyLabel">unsaved changes</span>
+      </div>
+      <div class="btn-row">
+        <button class="ghost" id="discardBtn">Discard</button>
+        <button class="primary" id="saveBtn">Save settings</button>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ============================================================
+     EMAIL EDITOR VIEW
+     ------------------------------------------------------------
+     A dedicated workspace for composing the 11 onboarding emails.
+     The operator writes in plain text (with a few markdown-lite
+     niceties); the editor renders responsive table-based HTML on
+     the fly so the email looks consistent on Gmail, Outlook,
+     Apple Mail, mobile clients, and webmail.
+     ============================================================ -->
+<div class="view view-email">
+<section class="hero">
+  <img class="phoenix" src="assets/fbspl-icon-phoenix-white.svg" alt="" aria-hidden="true" />
+  <div class="hero-inner">
+    <div class="overline">FBSPL · Audit operations · Email composition</div>
+    <h1>Email<br><span class="accent">editor</span></h1>
+    <p class="lede">Write each onboarding email as plain text. The editor renders responsive table-based HTML so the message looks the same on Gmail, Outlook, Apple Mail, and phones. Tokens like <code style="font-family:var(--font-mono);background:rgba(255,255,255,.16);color:#fff;padding:1px 6px;border-radius:4px;font-size:13px;">{{Agency_Name}}</code> stay verbatim and are filled per-client at send time.</p>
+    <div class="pill-row">
+      <span class="pill">11 emails · 1 document</span>
+      <span class="pill">Plain-text composing</span>
+      <span class="pill">Mobile-safe HTML</span>
+      <span class="pill">Live preview</span>
+    </div>
+  </div>
+</section>
+
+<main class="ee-main">
+  <!-- LEFT: template list -->
+  <aside class="ee-tplnav">
+    <h3>Templates</h3>
+    <ul class="ee-tpllist" id="eeTplList"><!-- populated by JS --></ul>
+
+    <h3>Reset</h3>
+    <ul class="ee-tpllist">
+      <li><button id="eeResetTplBtn" type="button"><span class="ee-tpl-name">Reset this template</span><span class="ee-idx">⟲</span></button></li>
+    </ul>
+
+    <div class="ee-cheat">
+      <h4>Formatting cheatsheet</h4>
+      <ul>
+        <li><code>**bold**</code><span>bold</span></li>
+        <li><code>*italic*</code><span>italic</span></li>
+        <li><code># Heading</code><span>section heading</span></li>
+        <li><code>- item</code><span>bullet list</span></li>
+        <li><code>1. item</code><span>numbered list</span></li>
+        <li><code>&gt; note</code><span>callout block</span></li>
+        <li><code>---</code><span>divider line</span></li>
+        <li><code>[text](url)</code><span>inline link</span></li>
+        <li><code>[[Button: Label|url]]</code><span>CTA button</span></li>
+        <li><code>{{Token_Name}}</code><span>kept verbatim</span></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- RIGHT: editor + preview -->
+  <section class="ee-pane">
+    <div class="ee-card">
+      <div class="ee-meta-head">
+        <div style="min-width:0;">
+          <div class="ee-tag" id="eeMetaTag">Template · 01</div>
+          <h2 id="eeMetaTitle">Audit Email</h2>
+          <p class="ee-meta-desc" id="eeMetaDesc">Sent immediately when a new client row is added.</p>
+        </div>
+        <span class="ee-badge" id="eeMetaBadge">First touch</span>
+      </div>
+
+      <div class="ee-field" style="margin-top:18px;">
+        <label>Subject line</label>
+        <input type="text" id="eeSubject" placeholder="AOS Audit – Next Steps" />
+      </div>
+
+      <div class="ee-field">
+        <label>Tokens <span class="hint">click to insert at cursor</span></label>
+        <div class="tokens ee-tokens" id="eeTokens"></div>
+      </div>
+
+      <div class="ee-field" id="eeAttachWrap">
+        <label>Attachment URL <span class="hint">optional · PDF/DOCX, ≤10 MB</span></label>
+        <input type="url" id="eeAttachUrl" placeholder="https://drive.google.com/uc?export=download&id=…" />
+        <div class="attach-uploader">
+          <button type="button" class="upload-btn" id="eeUploadBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload file
+          </button>
+          <span class="upload-status" id="eeUploadStatus"></span>
+        </div>
+      </div>
+
+      <div class="ee-modes" role="tablist" aria-label="Editing mode">
+        <button type="button" data-mode="text" class="active" role="tab">Plain text</button>
+        <button type="button" data-mode="html" role="tab">Raw HTML</button>
+      </div>
+
+      <div class="ee-split">
+        <!-- editor -->
+        <div class="ee-editor-col">
+          <div class="ee-col-head">
+            <span class="ee-col-title" id="eeEditorTitle">Compose · plain text</span>
+            <div class="ee-fmtbar" id="eeFmtBar">
+              <button type="button" data-fmt="bold"   title="Bold (**text**)" style="font-weight:800;">B</button>
+              <button type="button" data-fmt="italic" title="Italic (*text*)" style="font-style:italic;">I</button>
+              <span class="ee-fmt-sep"></span>
+              <button type="button" data-fmt="heading" title="Heading (# text)">H</button>
+              <button type="button" data-fmt="bullet"  title="Bulleted list (- item)">•</button>
+              <button type="button" data-fmt="ordered" title="Numbered list (1. item)">1.</button>
+              <button type="button" data-fmt="quote"   title="Callout (&gt; note)">&ldquo;</button>
+              <span class="ee-fmt-sep"></span>
+              <button type="button" data-fmt="link"    title="Link [text](url)">↗</button>
+              <button type="button" data-fmt="button"  title="CTA Button">▭</button>
+              <button type="button" data-fmt="hr"      title="Divider (---)">―</button>
+            </div>
+          </div>
+          <textarea id="eeSource"     class="ee-source"  placeholder="Write your email here…"></textarea>
+          <textarea id="eeRawHtml"    class="ee-rawhtml" placeholder="<!DOCTYPE html>&#10;…raw HTML body…" style="display:none;"></textarea>
+        </div>
+
+        <!-- preview -->
+        <div class="ee-preview-col">
+          <div class="ee-col-head">
+            <span class="ee-col-title">Live preview</span>
+            <div class="ee-preview-toggle" id="eePreviewToggle">
+              <button type="button" data-pv="desktop" class="active">Desktop</button>
+              <button type="button" data-pv="mobile">Mobile</button>
+            </div>
+          </div>
+          <div class="ee-preview-wrap">
+            <div class="ee-preview-subj" id="eePreviewSubj"><span>Subject</span><b id="eePreviewSubjText">—</b></div>
+            <iframe id="eePreview" class="ee-iframe" sandbox title="Email preview"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         NESTED DOCUMENT SUB-CARD
+         Shown only when the active template has documentBodyKey set
+         (currently just the NDA email — the attached NDA HTML doc).
+         The cover-letter email above and the attached document below
+         are edited side-by-side so they stay coordinated.
+         ============================================================ -->
+    <div class="ee-card ee-doc-card" id="eeDocCard" style="display:none;">
+      <div class="ee-meta-head">
+        <div style="min-width:0;">
+          <div class="ee-tag" style="color:#9C2A2A;">📎 Attached document · rendered per client</div>
+          <h2 id="eeDocMetaTitle">Document</h2>
+          <p class="ee-meta-desc" id="eeDocMetaDesc">—</p>
+        </div>
+        <span class="ee-badge ee-doc-badge" id="eeDocMetaBadge">Per-client</span>
+      </div>
+
+      <div class="ee-field" style="margin-top:18px;">
+        <label>Tokens <span class="hint">click to insert at cursor in the document body</span></label>
+        <div class="tokens ee-tokens" id="eeDocTokens"></div>
+      </div>
+
+      <div class="ee-split">
+        <div class="ee-editor-col">
+          <div class="ee-col-head">
+            <span class="ee-col-title">Document HTML</span>
+          </div>
+          <textarea id="eeDocBody" class="ee-rawhtml" placeholder="HTML body of the document. Leave empty to use the workflow's built-in fallback template — or click ‘Reset to defaults’ to insert the seeded sample NDA."></textarea>
+        </div>
+        <div class="ee-preview-col">
+          <div class="ee-col-head">
+            <span class="ee-col-title">Document preview</span>
+          </div>
+          <div class="ee-preview-wrap">
+            <iframe id="eeDocPreview" class="ee-iframe" sandbox title="Document preview"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="info clean" id="eeDirtyInfo">
+        <span class="count-badge" id="eeDirtyCount">0</span>
+        <span id="eeDirtyLabel">unsaved changes</span>
+      </div>
+      <div class="btn-row">
+        <button class="ghost" id="eeDiscardBtn">Discard</button>
+        <button class="primary" id="eeSaveBtn">Save email templates</button>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-veil" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="editTitle">Edit client</h2>
+        <div class="sub" id="editSub">—</div>
+      </div>
+      <button class="close" id="closeEditBtn">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Agency name</label>
+          <input type="text" id="e_agency_name" />
+        </div>
+        <div class="field">
+          <label>Primary contact</label>
+          <input type="text" id="e_agency_contact_name" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Contact email</label>
+          <input type="email" id="e_email" />
+        </div>
+        <div class="field">
+          <label>Audit start date</label>
+          <input type="date" id="e_audit_start_date" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Discovery call</label>
+          <input type="date" id="e_discovery_call_date" />
+        </div>
+        <div class="field">
+          <label>Project type</label>
+          <input type="text" id="e_project_type" />
+        </div>
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label>NDA status</label>
+          <select id="e_nda_status">
+            <option>Pending</option><option>Sent</option><option>Signed</option><option>Overdue</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Invoice status</label>
+          <select id="e_invoice_status">
+            <option>Pending</option><option>Sent</option><option>Paid</option><option>Overdue</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>AMS status</label>
+          <select id="e_ams_status">
+            <option>Pending</option><option>Requested</option><option>Received</option><option>Overdue</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Overall stage</label>
+        <input type="text" id="e_stage" placeholder="e.g. Audit In Progress" />
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="e_notes"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="left"><button class="ghost" id="deleteBtn">Delete client</button></div>
+      <div class="right">
+        <button class="ghost" id="cancelEditBtn">Cancel</button>
+        <button class="primary" id="saveEditBtn">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+  /* ============================================================
+     SUPABASE CONNECTION
+     ------------------------------------------------------------
+     - SUPABASE_URL: Project Settings → API → "Project URL"
+     - SUPABASE_ANON_KEY: the "publishable" / anon key (safe to ship in browser
+       because RLS policies enforce who can do what; see supabase_schema.sql).
+     ============================================================ */
+  const SUPABASE_URL      = 'https://zryeoxtljrbufckfsnxh.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_M_aXD-yy8QwITacuCqcV5Q_L5PcMoL8';
+  const REST = `${SUPABASE_URL}/rest/v1`;
+  const HEADERS = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+  };
+
+  /* ============================================================
+     STATE
+     ============================================================ */
+  let clients = [];                  // full list cached client-side
+  let sortKey = 'created_at';
+  let sortDir = -1;                  // -1 = desc, 1 = asc
+  let filters = { search:'', stage:'', nda:'', inv:'', ams:'' };
+  let editingId = null;
+
+  /* ============================================================
+     API CALLS
+     ------------------------------------------------------------
+     Thin wrappers around the Supabase PostgREST endpoints. We deliberately
+     return arrays / null on error so the UI handlers can stay terse.
+     ============================================================ */
+  async function apiList() {
+    const r = await fetch(`${REST}/clients?select=*&order=created_at.desc`, { headers: HEADERS });
+    if (!r.ok) throw new Error(`Supabase list failed: ${r.status}`);
+    return r.json();
+  }
+  async function apiInsert(row) {
+    const r = await fetch(`${REST}/clients`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify(row)
+    });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`Insert failed (${r.status}): ${t.slice(0,160)}`);
+    }
+    return (await r.json())[0];
+  }
+  async function apiPatch(id, patch) {
+    const r = await fetch(`${REST}/clients?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify(patch)
+    });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`Update failed (${r.status}): ${t.slice(0,160)}`);
+    }
+    return (await r.json())[0];
+  }
+  async function apiDelete(id) {
+    // Send Prefer: return=representation so PostgREST returns the deleted row(s) — lets us
+    // verify the delete actually happened. A 200 with [] means "API call worked but RLS
+    // hid the row from your SELECT, so nothing was deleted" — the silent-failure scenario.
+    const r = await fetch(`${REST}/clients?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' }
+    });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`Delete failed (${r.status}): ${t.slice(0,240)}`);
+    }
+    const deleted = await r.json().catch(() => []);
+    if (!Array.isArray(deleted) || deleted.length === 0) {
+      throw new Error(
+        'Delete API returned 200 but no rows were removed. ' +
+        'This usually means the anon role is missing DELETE grant on the clients table. ' +
+        'Run AOS_fix_delete_grants.sql in Supabase SQL Editor.'
+      );
+    }
+  }
+
+  /* ============================================================
+     CONNECTION STATE PILL
+     ============================================================ */
+  function setConn(state, label) {
+    const el = document.getElementById('connState');
+    const txt = document.getElementById('connText');
+    el.classList.remove('live','offline');
+    if (state) el.classList.add(state);
+    txt.textContent = label;
+  }
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  function toast(msg, err) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.toggle('err', !!err); t.classList.add('show');
+    clearTimeout(toast._t);
+    // Longer messages need more reading time. Errors stay up at least 6s.
+    const dwell = err ? Math.max(6000, msg.length * 60) : 2400;
+    toast._t = setTimeout(() => t.classList.remove('show'), dwell);
+  }
+
+  /* ============================================================
+     STATS
+     ============================================================ */
+  function computeStats() {
+    const now = Date.now();
+    const weekAgo = now - 7*86400000;
+    const newThisWeek = clients.filter(c => new Date(c.created_at).getTime() > weekAgo).length;
+    const ndaPending = clients.filter(c => c.nda_status !== 'Signed').length;
+    const invUnpaid  = clients.filter(c => c.invoice_status !== 'Paid').length;
+    const amsPending = clients.filter(c => c.ams_status !== 'Received').length;
+    const done       = clients.filter(c =>
+      c.nda_status === 'Signed' && c.invoice_status === 'Paid' && c.ams_status === 'Received'
+    ).length;
+
+    document.getElementById('statTotal').textContent = clients.length;
+    document.getElementById('statNew').textContent   = newThisWeek;
+    document.getElementById('statNda').textContent   = ndaPending;
+    document.getElementById('statInv').textContent   = invUnpaid;
+    document.getElementById('statAms').textContent   = amsPending;
+    document.getElementById('statDone').textContent  = done;
+  }
+
+  /* ============================================================
+     FILTERING + SORTING
+     ============================================================ */
+  function applyFiltersAndSort() {
+    const q = filters.search.toLowerCase().trim();
+    let rows = clients.filter(c => {
+      if (q) {
+        const hay = `${c.agency_name||''} ${c.agency_contact_name||''} ${c.email||''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (filters.stage && c.stage  !== filters.stage)         return false;
+      if (filters.nda   && c.nda_status     !== filters.nda)   return false;
+      if (filters.inv   && c.invoice_status !== filters.inv)   return false;
+      if (filters.ams   && c.ams_status     !== filters.ams)   return false;
+      return true;
+    });
+
+    rows.sort((a, b) => {
+      const av = a[sortKey] ?? '';
+      const bv = b[sortKey] ?? '';
+      if (av < bv) return -1 * sortDir;
+      if (av > bv) return  1 * sortDir;
+      return 0;
+    });
+
+    return rows;
+  }
+
+  /* ============================================================
+     STAGE PILL CLASS
+     ------------------------------------------------------------
+     Maps a status string to one of four colour classes used by .stage-select.
+     ============================================================ */
+  function pillClass(field, value) {
+    if (value === 'Overdue') return 'late';
+    if (field === 'nda')     return value === 'Signed'   ? 'done' : (value === 'Sent'      ? 'active' : 'pending');
+    if (field === 'invoice') return value === 'Paid'     ? 'done' : (value === 'Sent'      ? 'active' : 'pending');
+    if (field === 'ams')     return value === 'Received' ? 'done' : (value === 'Requested' ? 'active' : 'pending');
+    return 'pending';
+  }
+
+  /* ============================================================
+     RENDER TABLE
+     ============================================================ */
+  function render() {
+    const tbody = document.getElementById('clientsBody');
+    const rows = applyFiltersAndSort();
+    document.getElementById('visCount').textContent = `${rows.length} visible`;
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty">
+        <div class="ico">∅</div>
+        <h3>${clients.length === 0 ? 'No clients yet' : 'No matches'}</h3>
+        <p>${clients.length === 0 ? 'Add your first client using the form on the left.' : 'Try clearing the filters.'}</p>
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(c => `
+      <tr data-id="${c.id}">
+        <td>
+          <div class="primary-text">${escapeHtml(c.agency_name || '—')}</div>
+          <div class="secondary-text">${c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</div>
+        </td>
+        <td>
+          <div>${escapeHtml(c.agency_contact_name || '—')}</div>
+          <div class="secondary-text">${escapeHtml(c.email || '')}</div>
+        </td>
+        <td>${c.audit_start_date || '—'}</td>
+        <td>${stageSelect('nda',     c.nda_status,     c.id)}</td>
+        <td>${stageSelect('invoice', c.invoice_status, c.id)}</td>
+        <td>${stageSelect('ams',     c.ams_status,     c.id)}</td>
+        <td><span style="font-family:var(--font-mono);font-size:11px;">${escapeHtml(c.stage || 'New')}</span></td>
+        <td style="text-align:right;">
+          <div class="row-actions" style="justify-content:flex-end;">
+            <button data-action="edit" data-id="${c.id}">Edit</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    // wire inline stage dropdowns
+    tbody.querySelectorAll('.stage-select').forEach(sel => {
+      sel.addEventListener('change', onStageChange);
+    });
+    // wire edit buttons
+    tbody.querySelectorAll('button[data-action="edit"]').forEach(b => {
+      b.addEventListener('click', () => openEdit(b.dataset.id));
+    });
+  }
+
+  function stageSelect(field, value, id) {
+    const fieldCol = field === 'nda' ? 'nda_status' : field === 'invoice' ? 'invoice_status' : 'ams_status';
+    const opts = field === 'nda'     ? ['Pending','Sent','Signed','Overdue']
+              :  field === 'invoice' ? ['Pending','Sent','Paid','Overdue']
+              :                        ['Pending','Requested','Received','Overdue'];
+    return `<select class="stage-select ${pillClass(field, value)}" data-id="${id}" data-col="${fieldCol}" data-field="${field}">
+      ${opts.map(o => `<option ${o===value?'selected':''}>${o}</option>`).join('')}
+    </select>`;
+  }
+
+  async function onStageChange(e) {
+    const sel = e.target;
+    const id  = sel.dataset.id;
+    const col = sel.dataset.col;
+    const field = sel.dataset.field;
+    const value = sel.value;
+    // optimistic class swap
+    sel.className = `stage-select ${pillClass(field, value)}`;
+    try {
+      // Stamp the corresponding date column too. When NDA goes Sent we set
+      // nda_sent_date so the cron's overdue calc works without a separate write.
+      const patch = { [col]: value };
+      const today = new Date().toISOString().slice(0,10);
+      if (field === 'nda'     && value === 'Sent')     patch.nda_sent_date     ??= today;
+      if (field === 'invoice' && value === 'Sent')     patch.invoice_sent_date ??= today;
+      if (field === 'ams'     && value === 'Requested') patch.ams_request_date  ??= today;
+      const updated = await apiPatch(id, patch);
+      const idx = clients.findIndex(c => c.id === id);
+      if (idx >= 0) clients[idx] = updated;
+      computeStats();
+      toast(`${field.toUpperCase()} → ${value}`);
+    } catch (err) {
+      toast(err.message || 'Save failed', true);
+      load(); // reconcile on failure
+    }
+  }
+
+  /* ============================================================
+     EDIT MODAL
+     ============================================================ */
+  function openEdit(id) {
+    const c = clients.find(x => x.id === id);
+    if (!c) return;
+    editingId = id;
+    document.getElementById('editTitle').textContent = c.agency_name || 'Edit client';
+    document.getElementById('editSub').textContent = `id: ${c.id}`;
+    document.getElementById('e_agency_name').value         = c.agency_name || '';
+    document.getElementById('e_agency_contact_name').value = c.agency_contact_name || '';
+    document.getElementById('e_email').value               = c.email || '';
+    document.getElementById('e_audit_start_date').value    = c.audit_start_date || '';
+    document.getElementById('e_discovery_call_date').value = c.discovery_call_date || '';
+    document.getElementById('e_project_type').value        = c.project_type || '';
+    document.getElementById('e_nda_status').value          = c.nda_status || 'Pending';
+    document.getElementById('e_invoice_status').value      = c.invoice_status || 'Pending';
+    document.getElementById('e_ams_status').value          = c.ams_status || 'Pending';
+    document.getElementById('e_stage').value               = c.stage || '';
+    document.getElementById('e_notes').value               = c.notes || '';
+    document.getElementById('editModal').classList.add('show');
+  }
+  function closeEdit() {
+    editingId = null;
+    document.getElementById('editModal').classList.remove('show');
+  }
+
+  document.getElementById('closeEditBtn').addEventListener('click', closeEdit);
+  document.getElementById('cancelEditBtn').addEventListener('click', closeEdit);
+  document.getElementById('editModal').addEventListener('click', (e) => {
+    if (e.target.id === 'editModal') closeEdit();
+  });
+
+  document.getElementById('saveEditBtn').addEventListener('click', async () => {
+    if (!editingId) return;
+    const btn = document.getElementById('saveEditBtn');
+    btn.disabled = true; btn.innerHTML = '<span class="loading"></span>Saving…';
+    const patch = {
+      agency_name:         document.getElementById('e_agency_name').value.trim(),
+      agency_contact_name: document.getElementById('e_agency_contact_name').value.trim(),
+      email:               document.getElementById('e_email').value.trim(),
+      audit_start_date:    document.getElementById('e_audit_start_date').value || null,
+      discovery_call_date: document.getElementById('e_discovery_call_date').value || null,
+      project_type:        document.getElementById('e_project_type').value.trim() || null,
+      nda_status:          document.getElementById('e_nda_status').value,
+      invoice_status:      document.getElementById('e_invoice_status').value,
+      ams_status:          document.getElementById('e_ams_status').value,
+      stage:               document.getElementById('e_stage').value.trim() || 'New',
+      notes:               document.getElementById('e_notes').value || null
+    };
+    try {
+      const updated = await apiPatch(editingId, patch);
+      const idx = clients.findIndex(c => c.id === editingId);
+      if (idx >= 0) clients[idx] = updated;
+      closeEdit();
+      computeStats();
+      render();
+      toast('Client updated');
+    } catch (err) {
+      toast(err.message || 'Save failed', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save changes';
+    }
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!editingId) return;
+    if (!confirm('Delete this client permanently? The onboarding emails already sent will not be recalled.')) return;
+    try {
+      await apiDelete(editingId);
+      clients = clients.filter(c => c.id !== editingId);
+      closeEdit();
+      computeStats();
+      render();
+      toast('Client deleted');
+    } catch (err) {
+      toast(err.message || 'Delete failed', true);
+    }
+  });
+
+  /* ============================================================
+     ADD CLIENT
+     ------------------------------------------------------------
+     INSERT into Supabase. The Database Webhook on the clients table
+     then fires the n8n onboarding workflow.
+     ============================================================ */
+  document.getElementById('addBtn').addEventListener('click', async () => {
+    const fields = {
+      agency_name:         document.getElementById('f_agency_name'),
+      agency_contact_name: document.getElementById('f_agency_contact_name'),
+      email:               document.getElementById('f_email'),
+      audit_start_date:    document.getElementById('f_audit_start_date')
+    };
+    let ok = true;
+    Object.values(fields).forEach(el => {
+      el.classList.toggle('err', !el.value.trim());
+      if (!el.value.trim()) ok = false;
+    });
+    // very loose email shape check
+    if (fields.email.value && !/^.+@.+\..+$/.test(fields.email.value)) {
+      fields.email.classList.add('err'); ok = false;
+    }
+    if (!ok) { toast('Fill in the required fields', true); return; }
+
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true; btn.innerHTML = '<span class="loading"></span>Adding…';
+
+    const row = {
+      agency_name:         fields.agency_name.value.trim(),
+      agency_contact_name: fields.agency_contact_name.value.trim(),
+      email:               fields.email.value.trim(),
+      audit_start_date:    fields.audit_start_date.value,
+      discovery_call_date: document.getElementById('f_discovery_call_date').value || null,
+      project_type:        document.getElementById('f_project_type').value.trim() || null,
+      revenue:             document.getElementById('f_revenue').value ? Number(document.getElementById('f_revenue').value) : null,
+      notes:               document.getElementById('f_notes').value || null,
+      stage:               'New'
+    };
+    try {
+      const inserted = await apiInsert(row);
+      clients.unshift(inserted);
+      // clear form
+      ['f_agency_name','f_agency_contact_name','f_email','f_audit_start_date',
+       'f_discovery_call_date','f_project_type','f_revenue','f_notes']
+        .forEach(id => { document.getElementById(id).value = ''; });
+      Object.values(fields).forEach(el => el.classList.remove('err'));
+      computeStats(); render();
+      toast(`${row.agency_name} added — onboarding will fire shortly`);
+    } catch (err) {
+      toast(err.message || 'Add failed', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Add client';
+    }
+  });
+
+  /* ============================================================
+     FILTER / SEARCH BINDINGS
+     ============================================================ */
+  document.getElementById('searchBox').addEventListener('input', (e) => { filters.search = e.target.value; render(); });
+  document.getElementById('filterStage').addEventListener('change', (e) => { filters.stage  = e.target.value; render(); });
+  document.getElementById('filterNda').addEventListener('change',   (e) => { filters.nda    = e.target.value; render(); });
+  document.getElementById('filterInv').addEventListener('change',   (e) => { filters.inv    = e.target.value; render(); });
+  document.getElementById('filterAms').addEventListener('change',   (e) => { filters.ams    = e.target.value; render(); });
+  document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+    filters = { search:'', stage:'', nda:'', inv:'', ams:'' };
+    document.getElementById('searchBox').value = '';
+    ['filterStage','filterNda','filterInv','filterAms'].forEach(id => document.getElementById(id).value = '');
+    render();
+  });
+
+  /* sort headers */
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.sort;
+      if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+      document.querySelectorAll('th.sortable').forEach(x => x.classList.remove('sorted'));
+      th.classList.add('sorted');
+      th.querySelector('.arrow').textContent = sortDir === 1 ? '↑' : '↓';
+      render();
+    });
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', load);
+
+  /* ============================================================
+     UTIL
+     ============================================================ */
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+  }
+
+  /* ============================================================
+     LOAD + INIT
+     ============================================================ */
+  async function load() {
+    setConn('', 'loading…');
+    try {
+      clients = await apiList();
+      setConn('live', 'live · Supabase');
+      computeStats();
+      render();
+    } catch (err) {
+      setConn('offline', 'offline');
+      toast(err.message || 'Could not reach Supabase', true);
+      const tbody = document.getElementById('clientsBody');
+      tbody.innerHTML = `<tr><td colspan="8" class="empty">
+        <div class="ico">!</div><h3>Can't reach Supabase</h3>
+        <p>Check SUPABASE_URL / publishable key, or that RLS policies allow anon access.</p>
+      </td></tr>`;
+    }
+  }
+
+  // light auto-refresh so stages updated by n8n in the background appear quickly
+  setInterval(() => { if (!editingId) load(); }, 30000);
+
+  load();
+
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+const tabButtons = document.querySelectorAll('#tabNav button');
+const brandProduct = document.getElementById('brandProduct');
+const BRAND_TITLES = {
+  clients:  'Audit client database',
+  settings: 'Workflow settings',
+  email:    'Email editor'
+};
+function activateTab(tab) {
+  // Block leaving a config tab with unsaved changes (gentle confirm, not a block)
+  const currentTab = document.body.dataset.activeView;
+  const leavingConfig = (currentTab === 'settings' || currentTab === 'email') && tab === 'clients';
+  if (leavingConfig && Settings.hasUnsavedChanges()) {
+    if (!confirm('You have unsaved changes. Switch to Clients anyway? (they stay in this session)')) return;
+  }
+  document.body.dataset.activeView = tab;
+  tabButtons.forEach(b => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (brandProduct && BRAND_TITLES[tab]) brandProduct.textContent = BRAND_TITLES[tab];
+  // Restore scroll to top of the activated view
+  window.scrollTo({ top: 0, behavior: 'auto' });
+  if (tab === 'settings') Settings.init();
+  if (tab === 'email')    EmailEditor.init();
+}
+tabButtons.forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
+
+// Default: clients view
+document.body.dataset.activeView = 'clients';
+
+/* Keep the tab count badge fresh whenever the clients list changes. */
+(function patchClientCount () {
+  const origCompute = computeStats;
+  computeStats = function () {
+    origCompute();
+    const b = document.getElementById('tabCountClients');
+    if (b) b.textContent = clients.length;
+  };
+})();
+
+/* ============================================================
+   SETTINGS MODULE (lazy-init)
+   ============================================================ */
+
+/* ============================================================
+   SETTINGS VIEW MODULE
+   ------------------------------------------------------------
+   Self-contained. Initialised once when the user first switches
+   to the Settings tab (lazy — avoids loading email previews on
+   every page load).
+   ============================================================ */
+const Settings = (function () {
+  let initialised = false;
+  const dirtyChangeSubs = [];
+  const stateReplacedSubs = [];
+  function fireDirtyChange() { dirtyChangeSubs.forEach(cb => { try { cb(); } catch(e) { console.error(e); } }); }
+  function fireStateReplaced() { stateReplacedSubs.forEach(cb => { try { cb(); } catch(e) { console.error(e); } }); }
+
+  /* ---------- defaults (matches the workflow JSON; HTML templates from FBSPL email pack) ---------- */
+
+  // Helper: standardised FBSPL email shell — wraps body content in the brand template.
+  // Centralised so template tweaks (logo, footer, color) update every email at once.
+  function fbsplShell(title, innerHTML) {
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f4">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="margin:20px auto; border-radius:8px; overflow:hidden;">
+<tr><td style="background:#1f3c88; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;">${title}</td></tr>
+<tr><td style="padding:30px; color:#333333; font-size:15px; line-height:1.7;">
+${innerHTML}
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+  }
+
+  const DEFAULTS = {
+    sender_name: 'Laura Waldyn',
+    title: 'AOS Audit Lead',
+    reply_to: 'laura@aosaudit.com',
+    project_lead_email: 'projectlead@aosaudit.com',
+    interview_cc: 'saurabh.sakkarwal@fbspl.com',
+    accounting_emails: 'accounting@fbspl.com',
+
+    /* ---- 1. AOS Audit – Next Steps ---- */
+    audit_email_subject: "AOS Audit – Next Steps",
+    audit_email_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>AOS Audit – Next Steps</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">AOS Audit – Next Steps</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>Thank you again for your decision to move forward with our Agency Optimization Audit service. We are excited for the opportunity to work with you and your team.</p>\n<p>Below is a recap of the next steps as we prepare for the audit process:</p>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Executed NDA</strong><br><span style=\"color:#555;\">If you have not already received the NDA, it will be sent to you shortly for review and signature.</span></li>\n</ul>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Confirmation of Audit Start Date</strong><br><span style=\"color:#555;\">Once confirmed, we will begin coordinating the onboarding and scheduling process leading up to the audit start date.</span></li>\n</ul>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Introduction Email to Your Team</strong><br><span style=\"color:#555;\">As discussed, I will be conducting one-on-one interview calls with agency staff to better understand current workflows, procedures, and operational structure. To help ensure a smooth process, I strongly recommend leadership communicate the purpose and intention of these interviews with staff in advance.</span></li>\n</ul>\n<p>While this can certainly be communicated verbally, I kindly request that an introduction email also be sent to the applicable team members with myself cc’d. This introduction should include agency W-2 staff members who will be participating in the audit process and should not include 1099 outside producers or virtual assistants.</p>\n<p>For convenience, I have drafted and attached an Audit Introduction Email Template that you are welcome to use or modify as preferred. If possible, I kindly ask that this email be sent to staff before the end of the week.</p>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Scheduling Staff Interviews</strong><br><span style=\"color:#555;\">Once the introduction email has been sent, I will follow up directly with staff members and provide a Calendly scheduling link for them to book their interview times with me.</span></li>\n</ul>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Invoice Payment</strong><br><span style=\"color:#555;\">An invoice in the amount of $3,000 USD will be sent separately by the Accounting Team at FBSPL. Payment is not due until the official audit start date.</span></li>\n</ul>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Audit Kick-Off Call</strong><br><span style=\"color:#555;\">You will receive a calendar invitation for a 30-minute Audit Kick-Off Call scheduled for 10:00 AM CST on the audit start date. This meeting will be used to confirm alignment, review expectations, and discuss any outstanding or additional information needed before beginning the audit process.</span></li>\n</ul>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:8px;\"><strong>Pre-Audit Checklist</strong><br><span style=\"color:#555;\">Please find the attached AOS Pre-Audit Checklist for review. This may either be completed and returned prior to the audit start date or discussed together during the Kick-Off Call.</span></li>\n</ul>\n<p>Once the audit is complete, I will schedule a debrief session to review the Audit Report in detail, including all findings, observations, and recommendations.</p>\n<p>Please feel free to reach out with any questions in the meantime. I am very much looking forward to working with you and your team.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 2. Invoice ---- */
+    invoice_subject: "Invoice - AOS Audit Services",
+    invoice_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Invoice - AOS Audit Services</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">Invoice - AOS Audit Services</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>Thank you for moving forward with the AOS Operational Audit engagement.</p>\n<p>Attached is the invoice for the agreed Audit Services for {{Agency_Name}}. We kindly request that payment be processed at your earliest convenience to ensure timely scheduling and commencement of audit activities.</p>\n<p>If you require any additional documentation or have questions regarding the invoice, please let us know.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+    invoice_due_days: 7,
+
+    /* ---- 6. NDA ---- */
+    nda_subject: "NDA for Audit Engagement – Review & Signature",
+    nda_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>NDA for Audit Engagement – Review & Signature</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">NDA for Audit Engagement – Review & Signature</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>Attached is the Non-Disclosure Agreement (NDA) related to the AOS Audit engagement for {{Agency_Name}}.</p>\n<p>Please review and sign the document at your earliest convenience so we may proceed with the audit process as scheduled.</p>\n<p>If you have any questions regarding the agreement, please let us know.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 3. Introduce Laura ---- */
+    intro_subject: "Introduction: Laura - Your AOS Audit Interview Lead",
+    intro_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Introduction: Laura - Your AOS Audit Interview Lead</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">Introduction: Laura - Your AOS Audit Interview Lead</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Team_Member_Name}},</p>\n<p>As part of the upcoming AOS Operational Audit for {{Agency_Name}}, I will be leading the interview and discovery portion of the audit process.</p>\n<p>The objective of these one-on-one interviews is to better understand your team’s workflows, operational processes, responsibilities, and opportunities for improving efficiency across the organization.</p>\n<p>To help ensure the process is smooth and well received by your staff, we kindly request that you send an introductory email to your team members prior to scheduling the interviews. This introduction helps provide context around the purpose of the meetings and encourages open, collaborative participation.</p>\n<p>For your convenience, I’ve included a ready-to-use email template below that you may copy, customize if needed, and share directly with your staff members.</p>\n<hr style=\"border:none;border-top:1px solid #ddd;margin:20px 0;\">\n<h3 style=\"font-size:16px;margin:20px 0 8px;color:#002CCE;font-family:Arial,sans-serif;\">EMAIL TEMPLATE TO SHARE WITH STAFF</h3>\n<p style=\"font-style:italic;color:#555;margin:8px 0;\"><strong>Subject:</strong> Introduction to {{Sender_Name}} – Upcoming Operational Audit Interviews</p>\n<p>Hi Team,</p>\n<p>As part of our upcoming operational audit initiative with AOS, I would like to introduce {{Sender_Name}}, who will be conducting individual interviews with team members over the coming days.</p>\n<p>The purpose of these conversations is to better understand our current workflows, operational processes, team responsibilities, and opportunities for increased efficiency and improvement.</p>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:4px;\">Discuss your day-to-day workflows and responsibilities</li>\n  <li style=\"margin-bottom:4px;\">Share operational challenges or bottlenecks</li>\n  <li style=\"margin-bottom:4px;\">Provide honest feedback regarding current systems and processes</li>\n</ul>\n<p>These discussions are intended to be collaborative and constructive, and your input will play an important role in helping identify opportunities for operational improvement.</p>\n<p>You will receive scheduling details shortly.</p>\n<p>Thank you in advance for your participation and support.</p>\n<p>Best regards, [Agency Owner / POC Name]</p>\n<hr style=\"border:none;border-top:1px solid #ddd;margin:20px 0;\">\n<p>Once the introduction email has been shared with your team, we will proceed with sending the scheduling instructions and Calendly links for the interviews.</p>\n<p>Please let me know if you have any questions or if there’s anything you would like adjusted in the communication.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 7. Kickoff ---- */
+    kickoff_link: 'https://calendly.com/saurabh-sakkarwal-fbspl/kickoff-meeting',
+    staff_form_link: 'https://forms.gle/2zoPBV2Jx4KatSnw6',
+    kickoff_subject: "AOS Audit Kickoff Meeting",
+    kickoff_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>AOS Audit Kickoff Meeting</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">AOS Audit Kickoff Meeting</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>We are excited to begin the AOS Operational Audit process for {{Agency_Name}}.</p>\n<p>Please use the Calendly link below to schedule the Audit Kickoff Meeting:</p>\n<p style=\"margin:18px 0;\"><a href=\"{{Calendly_Link}}\" style=\"background:#002CCE;color:#FFFFFF;padding:12px 22px;text-decoration:none;border-radius:6px;display:inline-block;font-weight:600;\">Schedule Kickoff Meeting</a></p>\n<p>Kickoff Meeting Agenda:</p>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:4px;\">Audit process overview</li>\n  <li style=\"margin-bottom:4px;\">Timeline and expectations</li>\n  <li style=\"margin-bottom:4px;\">AMS access confirmation</li>\n  <li style=\"margin-bottom:4px;\">Interview scheduling process</li>\n  <li style=\"margin-bottom:4px;\">Key operational focus areas</li>\n</ul>\n<p>Please also complete the following staff interview form:</p>\n<p>{{Google_Form_Link}}</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 4. AMS Request ---- */
+    ams_subject: "AOS Audit - AMS Credentials Request",
+    ams_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>AOS Audit - AMS Credentials Request</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">AOS Audit - AMS Credentials Request</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>As part of the AOS Operational Audit process, we kindly request access to your AMS platform for analysis and operational review purposes.</p>\n<p>Please provide the following:</p>\n<ul style=\"margin:8px 0 16px;padding-left:22px;\">\n  <li style=\"margin-bottom:4px;\">AMS Platform Name</li>\n  <li style=\"margin-bottom:4px;\">User Login Credentials or Temporary Access</li>\n  <li style=\"margin-bottom:4px;\">MFA/Verification Instructions (if applicable)</li>\n  <li style=\"margin-bottom:4px;\">Any restrictions or notes related to system access</li>\n</ul>\n<p>All shared information will remain confidential and protected under the NDA.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 5. Interview Availability ---- */
+    interview_link: 'https://calendly.com/saurabhhomeauto/30min',
+    interview_reminder_hours: 24,
+    interview_subject: "AOS Audit Interview - Availability Request",
+    interview_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>AOS Audit Interview - Availability Request</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">AOS Audit Interview - Availability Request</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Team_Member_Name}},</p>\n<p>As part of the AOS Operational Audit process for {{Agency_Name}}, we would like to schedule your interview session with our audit team.</p>\n<p>Please use the Calendly link below to select a convenient time:</p>\n<p style=\"margin:18px 0;\"><a href=\"{{Calendly_Link}}\" style=\"background:#002CCE;color:#FFFFFF;padding:12px 22px;text-decoration:none;border-radius:6px;display:inline-block;font-weight:600;\">Schedule Interview</a></p>\n<p>We appreciate your participation and look forward to speaking with you.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 8. Interview Reminder ---- */
+    interview_reminder_subject: "Reminder: Interview Tomorrow",
+    interview_reminder_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Reminder: Interview Tomorrow</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">Reminder: Interview Tomorrow</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Team_Member_Name}},</p>\n<p>This is a friendly reminder that your AOS Audit interview session is scheduled for tomorrow at {{Interview_Date_Time}}.</p>\n<p>Meeting Link: {{Meeting_Link}}</p>\n<p>We appreciate your participation and look forward to speaking with you.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 9. AMS Reminder ---- */
+    ams_reminder_subject: "Reminder: AMS Credentials Required for AOS Audit",
+    ams_reminder_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Reminder: AMS Credentials Required for AOS Audit</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">Reminder: AMS Credentials Required for AOS Audit</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>This is a friendly reminder regarding the AMS credentials/access request for the AOS Operational Audit.</p>\n<p>We have not yet received the required access information needed to begin the audit analysis phase.</p>\n<p>Prompt submission will help us maintain the planned audit schedule.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 10. NDA Reminder ---- */
+    nda_reminder_subject: "Reminder: NDA Signature Required",
+    nda_reminder_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Reminder: NDA Signature Required</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">Reminder: NDA Signature Required</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>This is a friendly reminder regarding the NDA for the AOS Audit engagement.</p>\n<p>We kindly request that the signed agreement be returned at your earliest convenience so we may proceed with the audit process.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- 11. Payment Reminder ---- */
+    payment_reminder_subject: "Payment Reminder: Invoice Overdue",
+    payment_reminder_body: "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Payment Reminder: Invoice Overdue</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f4f4f4\">\n<tr><td align=\"center\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"margin:20px auto; border-radius:8px; overflow:hidden;\">\n<tr><td style=\"background:#002CCE; color:#ffffff; padding:20px; text-align:center; font-size:24px; font-weight:bold;\">Payment Reminder: Invoice Overdue</td></tr>\n<tr><td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.7;\">\n<p>Hello {{Agency_Contact_Name}},</p>\n<p>This is a reminder that payment for the attached AOS Audit Services invoice is currently overdue.</p>\n<p>We kindly request that payment be processed at your earliest convenience to avoid delays in scheduling or continuation of audit activities.</p>\n<p>If payment has already been submitted, please disregard this reminder.</p>\n<p style=\"margin-top:18px;\">Best regards,<br>{{Sender_Name}}<br>{{Title}}<br>FBSPL</p>\n</td></tr>\n</table>\n</td></tr>\n</table>\n</body>\n</html>",
+
+    /* ---- Cadence ---- */
+    /* Audit-relative leads (drive scheduled send via cron) */
+    invoice_lead_days: 7,
+    ams_lead_days: 5,
+    payment_alert_lead_days: 7,
+    /* Post-send overdue thresholds (drive reminder cadence) */
+    nda_overdue_days: 7,
+    invoice_overdue_days: 7,
+    ams_overdue_days: 3,
+    interview_pending_days: 2,
+    cron_interval_days: 1,
+    cron_hour: 9,
+
+    /* ---- Attachments (optional file URLs sent with onboarding emails) ---- */
+    audit_attachment_url: '',
+    invoice_attachment_url: '',
+    nda_attachment_url: '',
+    kickoff_attachment_url: '',
+    ams_attachment_url: '',
+    interview_attachment_url: '',
+
+    /* ---- Integrations ---- */
+    sweetprocess_token: '',
+    sweetprocess_sop_template: '{{Agency_Name}} - AOS SOP',
+    sheet_id: '',
+    sheet_tab: 'Revenue Sheet 2026',
+  
+    /* FBSPL NDA template — tokenized from the approved original.
+       Dynamic fields: {{Agency_Name}}, {{Agency_Contact_Name}},
+       {{Agency_Address}} (requires column in clients table),
+       {{Today}} (auto-filled at send time).
+       FBSPL signer (Madhukar Dubey / Managing Director) is hardcoded
+       since it's a company constant, not per-client. */
+    nda_template_html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Disclosure Agreement</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 40px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 50px 60px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 16px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+            text-indent: 30px;
+        }
+        p.no-indent {
+            text-indent: 0;
+        }
+        .witness-title {
+            text-align: center;
+            font-weight: bold;
+            margin: 30px 0 15px 0;
+            letter-spacing: 2px;
+        }
+        .signature-section {
+            margin-top: 50px;
+            page-break-inside: avoid;
+        }
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .signature-table td {
+            width: 50%;
+            padding: 15px;
+            vertical-align: top;
+            line-height: 1.8;
+        }
+        .signature-line {
+            margin-top: 40px;
+            border-top: 1px solid #000;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Non Disclosure Agreement</h1>
+
+    <p class="no-indent"><strong>THIS NON DISCLOSURE AGREEMENT</strong> (this &ldquo;Agreement&rdquo;) is made and entered into by and between <strong>{{Agency_Name}}</strong> located at {{Agency_Address}} (the &ldquo;Client&rdquo;), and <strong>Fusion Global Business Solutions Inc.</strong> with trading name of Fusion Business Solutions, a principal place of business at 459 Columbus Ave #4018, New York, NY 10024, United States (the &ldquo;Company&rdquo;), effective as of {{Today}}.</p>
+
+    <div class="witness-title">WITNESSETH:</div>
+
+    <p class="no-indent">The parties hereto, intending to be hereby legally bound, agree as follows:</p>
+
+    <h2>1. General</h2>
+    <p>The Company has requested and/or may be receiving from (Client) information of a non-public nature for use by the Company, and each of its agents, employees, and representatives (collectively, &ldquo;Representatives&rdquo;) in connection with the performance of professional and/or consulting services (the &ldquo;Services&rdquo;) to be provided by the Company to (Client).</p>
+
+    <h2>2. Confidential Information</h2>
+    <p>The parties acknowledge that, in the course of the Company&rsquo;s provision of Services, the Company may receive certain confidential information from or about (Client) or its affiliates, including but not limited to technical, financial and business information, names of clients, client information, potential clients, reports, plans, market projections, data and other confidential and proprietary information relating to (Client) or its business whether provided orally or in writing.</p>
+
+    <h2>3. Exclusions from Definition</h2>
+    <p>The term &ldquo;Information&rdquo; as used herein does not include any data or information which is already known to the Company at the time it is disclosed, or which has become generally known to the public through no wrongful act of the Company, has been rightfully received from a third party without restriction, or has been disclosed pursuant to a requirement of a governmental agency or law.</p>
+
+    <h2>4. Nondisclosure Obligation</h2>
+    <p>The Company as well as its Representatives receiving any Information shall keep such Information confidential and shall not disclose such information, in whole or in part, to any person other than its Representatives who need to know such Information in connection with the Company&rsquo;s evaluation thereof in connection with the Services.</p>
+
+    <h2>5. Standard of Protection</h2>
+    <p>For the purpose of complying with the obligations set forth herein, the Company shall use efforts commensurate with those that such party employs for the protection of corresponding sensitive information of its own.</p>
+
+    <h2>6. Nonuse Obligation</h2>
+    <p>The Company agrees that it will not, directly or indirectly, attempt to appropriate or otherwise take for its or other parties&rsquo; benefit the business opportunity of (Client) as it relates to the business of (Client).</p>
+
+    <h2>7. Ownership; Return of Information</h2>
+    <p>All Information shall remain the property of (Client). Within three (3) days following the receipt of a written request from (Client), the Company will either deliver to (Client) or destroy all tangible materials containing or embodying the Information received from (Client).</p>
+
+    <h2>8. No Representations or Further Obligations</h2>
+    <p>Neither this Agreement nor the disclosure or receipt of Information shall constitute or imply any promise or intention to undertake to provide the Services. Client shall not accept, approach, or engage any FBSPL staff member / employee during or after the termination of services from this agreement without the prior consent of FBSPL.</p>
+
+    <h2>9. Term &ndash; Termination</h2>
+    <p>This Agreement shall terminate as to the exchange of any new Information three (3) months after the effective date hereof. Either party may terminate the exchange of Information under this Agreement at any time by written notice to the other.</p>
+
+    <h2>10. Applicability to Representatives and Affiliates</h2>
+    <p>The obligations of the Company hereunder of nondisclosure and nonuse shall extend to its affiliates and Representatives.</p>
+
+    <h2>11. Governing Law</h2>
+    <p>This Agreement shall be governed by and construed and enforced in accordance with the laws of the United States of America.</p>
+
+    <div class="signature-section">
+        <h2>Approval Signatures</h2>
+        <p class="no-indent">IN WITNESS WHEREOF, the undersigned parties hereby agree to the Service levels defined in this document and the parties have executed and delivered this Nondisclosure Agreement effective as of the date signed below.</p>
+
+        <table class="signature-table">
+            <tr>
+                <td>
+                    Signed By:<br>
+                    <div class="signature-line"></div>
+                    <strong>Madhukar Dubey</strong><br>
+                    Managing Director<br>
+                    Fusion Business Solutions (P) LTD
+                </td>
+                <td>
+                    Signed By:<br>
+                    <div class="signature-line"></div>
+                    <strong>{{Agency_Contact_Name}}</strong><br>
+                    Authorized Representative<br>
+                    {{Agency_Name}}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>`,
+
+    /* ============================================================
+       EMAIL EDITOR — PLAIN-TEXT SOURCES + MODE FLAGS
+       ------------------------------------------------------------
+       Each *_source key holds the markdown-lite source the operator
+       writes. The corresponding *_body key (HTML) is regenerated
+       live from this source whenever the source changes. *_mode is
+       'text' (default) or 'html' — in 'html' mode the operator is
+       editing *_body directly and the source is ignored.
+       ============================================================ */
+
+    audit_email_mode: 'text',
+    audit_email_source: `Hello {{Agency_Contact_Name}},
+
+Thank you again for your decision to move forward with our Agency Optimization Audit service. We are excited for the opportunity to work with you and your team.
+
+Below is a recap of the next steps as we prepare for the audit process:
+
+- **Executed NDA** — If you have not already received the NDA, it will be sent to you shortly for review and signature.
+- **Confirmation of Audit Start Date** — Once confirmed, we will begin coordinating the onboarding and scheduling process leading up to the audit start date.
+- **Introduction Email to Your Team** — As discussed, I will be conducting one-on-one interview calls with agency staff to better understand current workflows, procedures, and operational structure. To help ensure a smooth process, I strongly recommend leadership communicate the purpose and intention of these interviews with staff in advance.
+
+While this can certainly be communicated verbally, I kindly request that an introduction email also be sent to the applicable team members with myself cc'd. This introduction should include agency W-2 staff members who will be participating in the audit process and should not include 1099 outside producers or virtual assistants.
+
+For convenience, I have drafted and attached an Audit Introduction Email Template that you are welcome to use or modify as preferred. If possible, I kindly ask that this email be sent to staff before the end of the week.
+
+- **Scheduling Staff Interviews** — Once the introduction email has been sent, I will follow up directly with staff members and provide a Calendly scheduling link for them to book their interview times with me.
+- **Invoice Payment** — An invoice in the amount of $3,000 USD will be sent separately by the Accounting Team at FBSPL. Payment is not due until the official audit start date.
+- **Audit Kick-Off Call** — You will receive a calendar invitation for a 30-minute Audit Kick-Off Call scheduled for 10:00 AM CST on the audit start date. This meeting will be used to confirm alignment, review expectations, and discuss any outstanding or additional information needed before beginning the audit process.
+- **Pre-Audit Checklist** — Please find the attached AOS Pre-Audit Checklist for review. This may either be completed and returned prior to the audit start date or discussed together during the Kick-Off Call.
+
+Once the audit is complete, I will schedule a debrief session to review the Audit Report in detail, including all findings, observations, and recommendations.
+
+Please feel free to reach out with any questions in the meantime. I am very much looking forward to working with you and your team.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    invoice_mode: 'text',
+    invoice_source: `Hello {{Agency_Contact_Name}},
+
+Thank you for moving forward with the AOS Operational Audit engagement.
+
+Attached is the invoice for the agreed Audit Services for **{{Agency_Name}}**. We kindly request that payment be processed at your earliest convenience to ensure timely scheduling and commencement of audit activities.
+
+If you require any additional documentation or have questions regarding the invoice, please let us know.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    nda_mode: 'text',
+    nda_source: `Hello {{Agency_Contact_Name}},
+
+Attached is the **Non-Disclosure Agreement (NDA)** related to the AOS Audit engagement for {{Agency_Name}}.
+
+Please review and sign the document at your earliest convenience so we may proceed with the audit process as scheduled.
+
+If you have any questions regarding the agreement, please let us know.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    intro_mode: 'text',
+    intro_source: `Hello {{Team_Member_Name}},
+
+As part of the upcoming AOS Operational Audit for **{{Agency_Name}}**, I will be leading the interview and discovery portion of the audit process.
+
+The objective of these one-on-one interviews is to better understand your team's workflows, operational processes, responsibilities, and opportunities for improving efficiency across the organization.
+
+To help ensure the process is smooth and well received by your staff, we kindly request that you send an introductory email to your team members prior to scheduling the interviews. This introduction helps provide context around the purpose of the meetings and encourages open, collaborative participation.
+
+For your convenience, I've included a ready-to-use email template below that you may copy, customize if needed, and share directly with your staff members.
+
+---
+
+# Email template to share with staff
+
+> **Subject:** Introduction to {{Sender_Name}} — Upcoming Operational Audit Interviews
+
+Hi Team,
+
+As part of our upcoming operational audit initiative with AOS, I would like to introduce {{Sender_Name}}, who will be conducting individual interviews with team members over the coming days.
+
+The purpose of these conversations is to better understand our current workflows, operational processes, team responsibilities, and opportunities for increased efficiency and improvement.
+
+- Discuss your day-to-day workflows and responsibilities
+- Share operational challenges or bottlenecks
+- Provide honest feedback regarding current systems and processes
+
+These discussions are intended to be collaborative and constructive, and your input will play an important role in helping identify opportunities for operational improvement.
+
+You will receive scheduling details shortly.
+
+Thank you in advance for your participation and support.
+
+Best regards, [Agency Owner / POC Name]
+
+---
+
+Once the introduction email has been shared with your team, we will proceed with sending the scheduling instructions and Calendly links for the interviews.
+
+Please let me know if you have any questions or if there's anything you would like adjusted in the communication.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    kickoff_mode: 'text',
+    kickoff_source: `Hello {{Agency_Contact_Name}},
+
+We are excited to begin the AOS Operational Audit process for **{{Agency_Name}}**.
+
+Please use the link below to schedule the Audit Kickoff Meeting:
+
+[[Button: Schedule Kickoff Meeting|{{Calendly_Link}}]]
+
+# Kickoff meeting agenda
+
+- Audit process overview
+- Timeline and expectations
+- AMS access confirmation
+- Interview scheduling process
+- Key operational focus areas
+
+Please also complete the following staff interview form: [Staff Interview Form]({{Google_Form_Link}})
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    ams_mode: 'text',
+    ams_source: `Hello {{Agency_Contact_Name}},
+
+As part of the AOS Operational Audit process, we kindly request access to your AMS platform for analysis and operational review purposes.
+
+Please provide the following:
+
+- AMS Platform Name
+- User Login Credentials or Temporary Access
+- MFA / Verification Instructions (if applicable)
+- Any restrictions or notes related to system access
+
+> All shared information will remain confidential and protected under the NDA.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    interview_mode: 'text',
+    interview_source: `Hello {{Team_Member_Name}},
+
+As part of the AOS Operational Audit process for **{{Agency_Name}}**, we would like to schedule your interview session with our audit team.
+
+Please use the link below to select a convenient time:
+
+[[Button: Schedule Interview|{{Calendly_Link}}]]
+
+We appreciate your participation and look forward to speaking with you.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    interview_reminder_mode: 'text',
+    interview_reminder_source: `Hello {{Team_Member_Name}},
+
+This is a friendly reminder that your AOS Audit interview session is scheduled for tomorrow at **{{Interview_Date_Time}}**.
+
+Meeting link: [{{Meeting_Link}}]({{Meeting_Link}})
+
+We appreciate your participation and look forward to speaking with you.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    ams_reminder_mode: 'text',
+    ams_reminder_source: `Hello {{Agency_Contact_Name}},
+
+This is a friendly reminder regarding the **AMS credentials / access request** for the AOS Operational Audit.
+
+We have not yet received the required access information needed to begin the audit analysis phase.
+
+> Prompt submission will help us maintain the planned audit schedule.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    nda_reminder_mode: 'text',
+    nda_reminder_source: `Hello {{Agency_Contact_Name}},
+
+This is a friendly reminder regarding the **NDA** for the AOS Audit engagement.
+
+We kindly request that the signed agreement be returned at your earliest convenience so we may proceed with the audit process.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+
+    payment_reminder_mode: 'text',
+    payment_reminder_source: `Hello {{Agency_Contact_Name}},
+
+This is a reminder that payment for the attached **AOS Audit Services invoice** is currently overdue.
+
+We kindly request that payment be processed at your earliest convenience to avoid delays in scheduling or continuation of audit activities.
+
+> If payment has already been submitted, please disregard this reminder.
+
+Best regards,
+{{Sender_Name}}
+{{Title}}
+FBSPL`,
+};
+
+  /* Sample data used by the live preview pane (PDF token vocabulary) */
+  const SAMPLE = {
+    Agency_Contact_Name: 'Sarah Mitchell',
+    Agency_Name: 'Gordon Wood Insurance',
+    Audit_Start_Date: 'June 1, 2026',
+    Sender_Name: 'Laura Waldyn',
+    Title: 'AOS Audit Lead',
+    Team_Member_Name: 'Alex Chen',
+    Calendly_Link: 'https://calendly.com/saurabhhomeauto/30min',
+    Google_Form_Link: 'https://forms.gle/2zoPBV2Jx4KatSnw6',
+    Interview_Date_Time: 'Tuesday, June 9 · 10:00 AM EST',
+    Meeting_Link: 'https://meet.google.com/abc-defg-hij'
+  };
+
+
+  const STORAGE_KEY = 'aos_workflow_settings_v2';
+  let current = {};
+  let saved = {};
+
+  /* (Supabase config + HEADERS provided by shared layer above) */
+
+  /* ---------- storage helpers ----------
+     loadSettings() — try Supabase first; if network is dead, fall back to local cache
+     saveSettings() — write local cache first (UI stays snappy + offline-safe),
+                      then UPSERT to Supabase. Surface a partial-save warning if it fails. */
+  async function loadSettings() {
+    // 1. Try Supabase (source of truth)
+    try {
+      const r = await fetch(`${REST}/workflow_settings?key=eq.current&select=value`, {
+        method: 'GET',
+        headers: HEADERS,
+        cache: 'no-store'
+      });
+      if (r.ok) {
+        const rows = await r.json();
+        const data = rows && rows[0] && rows[0].value;
+        if (data && typeof data === 'object' && Object.keys(data).length) {
+          try {
+            (window.storage?.set
+              ? window.storage.set(STORAGE_KEY, JSON.stringify(data))
+              : localStorage.setItem(STORAGE_KEY, JSON.stringify(data)));
+          } catch (_) {}
+          return data;
+        }
+      }
+    } catch (e) {
+      console.warn('Supabase GET failed, falling back to local cache:', e);
+    }
+    // 2. Local cache
+    try {
+      if (window.storage && window.storage.get) {
+        const r = await window.storage.get(STORAGE_KEY);
+        if (r && r.value) return JSON.parse(r.value);
+      } else {
+        const v = localStorage.getItem(STORAGE_KEY);
+        if (v) return JSON.parse(v);
+      }
+    } catch (_) {}
+    // 3. Defaults
+    return { ...DEFAULTS };
+  }
+
+  async function saveSettings(obj) {
+    const payload = { ...obj, _version: (obj._version || 0) + 1, _savedAt: new Date().toISOString() };
+
+    // 1. Local cache — instant, also keeps the console working if Supabase is unreachable
+    try {
+      if (window.storage && window.storage.set) {
+        await window.storage.set(STORAGE_KEY, JSON.stringify(payload));
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      }
+    } catch (_) { /* non-fatal — Supabase is the source of truth */ }
+
+    // 2. UPSERT the row into workflow_settings.
+    //    PostgREST handles upsert with Prefer: resolution=merge-duplicates + on_conflict.
+    //    Body is the row shape {key, value}; the entire payload goes into the jsonb value column.
+    let r;
+    try {
+      r = await fetch(`${REST}/workflow_settings?on_conflict=key`, {
+        method: 'POST',
+        headers: {
+          ...HEADERS,
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify({ key: 'current', value: payload })
+      });
+    } catch (e) {
+      throw new Error('Network error reaching Supabase — settings saved locally only');
+    }
+    if (!r.ok) {
+      const txt = await r.text().catch(() => '');
+      throw new Error(`Supabase save rejected (${r.status}). ${txt.slice(0, 160)}`);
+    }
+    return payload;
+  }
+
+
+  /* ---------- DOM bindings ---------- */
+  function bindForm(data) {
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const k = el.dataset.key;
+      const v = data[k];
+      if (v === undefined || v === null) return;
+      el.value = v;
+      el.oninput = () => {
+        let val = el.value;
+        if (el.type === 'number') val = el.value === '' ? '' : Number(el.value);
+        current[k] = val;
+        markDirty();
+        updatePreviewsFor(k);
+      };
+    });
+    bindTokenInsertion();
+    document.querySelectorAll('[data-preview-for]').forEach(p => updatePreviewElement(p));
+  }
+
+  function bindTokenInsertion() {
+    document.querySelectorAll('.tokens').forEach(group => {
+      const targetKey = group.dataset.target;
+      group.querySelectorAll('.tok').forEach(tok => {
+        tok.onclick = () => {
+          const ta = document.querySelector(`textarea[data-key="${targetKey}"]`);
+          if (!ta) return;
+          const t = tok.textContent;
+          const start = ta.selectionStart, end = ta.selectionEnd;
+          ta.value = ta.value.slice(0, start) + t + ta.value.slice(end);
+          ta.focus();
+          ta.selectionStart = ta.selectionEnd = start + t.length;
+          ta.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+      });
+    });
+  }
+
+  function fillTokens(str) {
+    if (!str) return '';
+    // Match both {{Token_Name}} and {Token_Name} formats
+    return str.replace(/\{\{?\s*([\w]+)\s*\}?\}/g, (_, k) => SAMPLE[k] !== undefined ? SAMPLE[k] : `[${k}]`);
+  }
+
+  function updatePreviewElement(p) {
+    const bodyKey = p.dataset.previewFor;
+    const subjKey = p.dataset.subjectFrom;
+    const rawBody = current[bodyKey] || '';
+    const subj = fillTokens(current[subjKey] || '');
+
+    // Detect if body is a full HTML document (starts with <!DOCTYPE or <html)
+    const isFullHTML = /^\s*<!DOCTYPE|^\s*<html/i.test(rawBody);
+    let bodyFilled = fillTokens(rawBody);
+
+    // Build a minimal iframe srcdoc — full HTML renders in isolation, fragments get wrapped.
+    const srcdoc = isFullHTML
+      ? bodyFilled
+      : `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;color:#333;font-size:15px;line-height:1.7;padding:20px;margin:0;background:#f4f4f4}p{margin:0 0 10px}strong{color:#000}ul{margin:8px 0 12px;padding-left:22px}a{color:#1f3c88}</style></head><body>${bodyFilled}</body></html>`;
+
+    // Escape srcdoc-incompatible chars
+    const safe = srcdoc.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
+    p.innerHTML = `<div class="pv-subj">${subj || '(no subject)'}</div>
+      <iframe class="pv-iframe" srcdoc="${safe}" sandbox></iframe>`;
+  }
+  function updatePreviewsFor(changedKey) {
+    document.querySelectorAll('[data-preview-for]').forEach(p => {
+      if (p.dataset.previewFor === changedKey || p.dataset.subjectFrom === changedKey) {
+        updatePreviewElement(p);
+      }
+    });
+  }
+
+  /* ---------- dirty / save state ---------- */
+  function dirtyKeys() {
+    return Object.keys(current).filter(k => JSON.stringify(current[k]) !== JSON.stringify(saved[k]));
+  }
+  function markDirty() {
+    const n = dirtyKeys().length;
+    document.getElementById('dirtyCount').textContent = n;
+    document.getElementById('dirtyLabel').textContent = n === 1 ? 'unsaved change' : 'unsaved changes';
+    document.getElementById('dirtyInfo').classList.toggle('clean', n === 0);
+    const state = document.getElementById('saveState');
+    const txt = document.getElementById('statusText');
+    if (n > 0) { state.classList.add('unsaved'); txt.textContent = `${n} unsaved`; }
+    else { state.classList.remove('unsaved'); txt.textContent = 'All changes saved'; }
+    fireDirtyChange();
+  }
+  function setMeta(s) {
+    document.getElementById('versionTag').textContent = s._version || '1';
+    document.getElementById('lastSaved').textContent = s._savedAt
+      ? new Date(s._savedAt).toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+      : 'never';
+  }
+
+  /* (toast provided by shared layer) */
+
+  /* ---------- buttons ---------- */
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.innerHTML = '<span class="loading"></span>Saving…';
+    try {
+      const out = await saveSettings(current);
+      saved = JSON.parse(JSON.stringify(out));
+      current = JSON.parse(JSON.stringify(out));
+      setMeta(out); markDirty();
+      fireStateReplaced();
+      setConn('live', 'live · Supabase');
+      toast('Saved to Supabase');
+    } catch (e) {
+      // saveSettings already wrote the local cache; only the Supabase push failed
+      setConn('offline', 'saved local · Supabase unreachable');
+      toast(e.message || 'Save failed — try again', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save settings';
+    }
+  });
+
+  document.getElementById('discardBtn').addEventListener('click', () => {
+    if (dirtyKeys().length === 0) return;
+    if (!confirm('Discard all unsaved changes?')) return;
+    current = JSON.parse(JSON.stringify(saved));
+    bindForm(current);
+    document.querySelectorAll('[data-preview-for]').forEach(p => updatePreviewElement(p));
+    markDirty();
+    fireStateReplaced();
+    toast('Changes discarded');
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!confirm('Reset every field to factory defaults? (you still need to click Save afterwards)')) return;
+    current = { ...DEFAULTS };
+    bindForm(current);
+    markDirty();
+    fireStateReplaced();
+    toast('Defaults loaded — Save to persist');
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    const blob = new Blob([JSON.stringify(current, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'aos-workflow-settings.json'; a.click();
+    URL.revokeObjectURL(url);
+    toast('Exported aos-workflow-settings.json');
+  });
+
+  document.getElementById('importBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'application/json';
+    inp.onchange = () => {
+      const f = inp.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const obj = JSON.parse(r.result);
+          current = { ...DEFAULTS, ...obj };
+          delete current._version; delete current._savedAt;
+          bindForm(current); markDirty();
+          fireStateReplaced();
+          toast('Imported — review and Save');
+        } catch (err) { toast('Invalid JSON file', true); }
+      };
+      r.readAsText(f);
+    };
+    inp.click();
+  });
+
+  /* ---------- nav active state ---------- */
+  const sections = [...document.querySelectorAll('main .section')];
+  const navLinks = [...document.querySelectorAll('nav.side a[data-target]')];
+  function updateActiveNav() {
+    const y = window.scrollY + 140;
+    let active = sections[0]?.id;
+    for (const s of sections) if (s.offsetTop <= y) active = s.id;
+    navLinks.forEach(a => a.classList.toggle('active', a.dataset.target === active));
+  }
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+  /* (setConn provided by shared layer) */
+  async function pingSettings() {
+    try {
+      const r = await fetch(`${REST}/workflow_settings?select=key&limit=1`, { headers: HEADERS, cache: 'no-store' });
+      if (r.ok) { setConn('live', 'live · Supabase'); return true; }
+      setConn('offline', `Supabase ${r.status}`); return false;
+    } catch (_) {
+      setConn('offline', 'offline · cached'); return false;
+    }
+  }
+
+  /* ---------- prevent accidental nav loss ---------- */
+  window.addEventListener('beforeunload', (e) => {
+    if (dirtyKeys().length > 0) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* (init handled by tab switching: Settings.init() called when settings tab first activated) */
+
+  /* ============================================================
+     Attachment uploads → Supabase Storage
+     ------------------------------------------------------------
+     Each "Upload file" button opens a file picker, uploads to the
+     'aos-attachments' bucket (must exist; see supabase_storage.sql),
+     and writes the public URL into the matching attachment URL input.
+     ============================================================ */
+  const STORAGE_BUCKET = 'aos-attachments';
+
+  function bindUploadButtons() {
+    document.querySelectorAll('.upload-btn[data-upload-for]').forEach(btn => {
+      btn.onclick = () => triggerUpload(btn);
+    });
+  }
+
+  function triggerUpload(btn) {
+    const targetKey = btn.dataset.uploadFor;
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword';
+    fileInput.onchange = async () => {
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      await uploadAttachment(f, targetKey, btn);
+    };
+    fileInput.click();
+  }
+
+  async function uploadAttachment(file, targetKey, btn) {
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadStatus(targetKey, `Too large: ${(file.size/1024/1024).toFixed(1)}MB (10MB max)`, 'err');
+      return;
+    }
+    const status = setUploadStatus.bind(null, targetKey);
+    btn.disabled = true;
+    btn.textContent = ' Uploading…';
+    status(`Uploading ${file.name}…`, '');
+
+    // Safe path: templates/<key>/<timestamp>-<sanitized name>
+    const cleanName = file.name.replace(/[^\w.\-]/g, '_');
+    const path = `templates/${targetKey}/${Date.now()}-${cleanName}`;
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`;
+
+    try {
+      const r = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'apikey':        SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type':  file.type || 'application/octet-stream',
+          'x-upsert':      'true'
+        },
+        body: file
+      });
+      if (!r.ok) {
+        const txt = await r.text();
+        throw new Error(`${r.status}: ${txt.slice(0,160)}`);
+      }
+      const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+      // Write into the URL input + mark dirty so the operator hits Save
+      const input = document.querySelector(`input[data-key="${targetKey}"]`);
+      if (input) {
+        input.value = publicUrl;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      status(`✓ ${file.name} • ${(file.size/1024).toFixed(0)} KB — click Save to persist`, 'ok');
+      toast('Uploaded — remember to Save settings');
+    } catch (e) {
+      status(`Upload failed: ${e.message}`, 'err');
+      toast('Upload failed: ' + e.message, true);
+    } finally {
+      // Reset the button label (icon SVG is re-rendered fresh)
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload file';
+    }
+  }
+
+  function setUploadStatus(targetKey, msg, cls) {
+    const el = document.querySelector(`[data-upload-status-for="${targetKey}"]`);
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'upload-status' + (cls ? ' ' + cls : '');
+  }
+
+
+  async function init() {
+    if (initialised) return;
+    initialised = true;
+    setConn('', 'connecting…');
+    const loaded = await loadSettings();
+    const data = { ...DEFAULTS, ...loaded };
+    saved = JSON.parse(JSON.stringify(data));
+    current = JSON.parse(JSON.stringify(data));
+    bindForm(current);
+    bindUploadButtons();
+    setMeta(data);
+    markDirty();
+    fireStateReplaced();
+    updateActiveNav();
+    pingSettings();
+  }
+
+  return {
+    init,
+    hasUnsavedChanges: () => dirtyKeys().length > 0,
+    /* Live state access (returns the current object by reference so mutations stick) */
+    state: () => current,
+    defaults: () => DEFAULTS,
+    sample: () => SAMPLE,
+    /* Mutate one key + fire dirty tracking */
+    setKey: (k, v) => { current[k] = v; markDirty(); },
+    /* Token substitution helper used by preview rendering */
+    fillTokens: (s) => fillTokens(s),
+    /* Subscribers */
+    onDirtyChange: (cb) => dirtyChangeSubs.push(cb),
+    onStateReplaced: (cb) => stateReplacedSubs.push(cb),
+    /* Programmatic save/discard so EmailEditor toolbar can reuse the existing flows */
+    triggerSave: () => document.getElementById('saveBtn').click(),
+    triggerDiscard: () => document.getElementById('discardBtn').click(),
+    /* Attachment upload pipeline reused for email-editor uploads */
+    uploadFile: (file, targetKey, btn) => uploadAttachment(file, targetKey, btn),
+    setUploadStatus
+  };
+})();
+
+
+/* ============================================================
+   MARKDOWN-LITE → RESPONSIVE EMAIL HTML
+   ------------------------------------------------------------
+   The operator writes in a constrained markdown-like syntax;
+   the converter produces table-based HTML that renders the same
+   way on Gmail (web/app), Outlook, Apple Mail, Yahoo, and any
+   mobile webmail. Tables + inline styles + a small media query
+   at the top are the only things every major email client
+   supports reliably.
+
+   Syntax cheatsheet:
+     **bold**                → <strong>
+     *italic*                → <em>
+     # Heading               → section heading (full line)
+     - item / * item         → bullet list (consecutive lines = one list)
+     1. item                 → ordered list
+     > callout               → inset callout block
+     ---                     → divider rule
+     [text](url)             → inline link
+     [[Button: Label|url]]   → CTA button
+     {{Token_Name}}          → left verbatim, filled at send time
+     blank line              → paragraph break
+     single newline          → line break inside paragraph
+   ============================================================ */
+
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function mdToHtml(src) {
+  if (!src || !src.trim()) return '';
+  src = src.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = src.split('\n');
+  const blocks = [];
+  let i = 0;
+
+  function isHr(t)      { return /^---+$/.test(t); }
+  function isHead(t)    { return /^#\s+/.test(t); }
+  function isBullet(t)  { return /^[-*]\s+/.test(t); }
+  function isOrdered(t) { return /^\d+\.\s+/.test(t); }
+  function isQuote(t)   { return /^>\s?/.test(t); }
+  function isButton(t)  { return /^\[\[Button:\s*.+?\s*\|\s*.+?\s*\]\]$/.test(t); }
+  function isBlock(t)   { return isHr(t) || isHead(t) || isBullet(t) || isOrdered(t) || isQuote(t) || isButton(t); }
+
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    if (trimmed === '') { i++; continue; }
+
+    if (isHr(trimmed))     { blocks.push({ type: 'hr' }); i++; continue; }
+    if (isHead(trimmed))   { blocks.push({ type: 'heading', content: trimmed.replace(/^#\s+/, '') }); i++; continue; }
+
+    if (isBullet(trimmed)) {
+      const items = [];
+      while (i < lines.length && isBullet(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^[-*]\s+/, ''));
+        i++;
+      }
+      blocks.push({ type: 'ul', items }); continue;
+    }
+    if (isOrdered(trimmed)) {
+      const items = [];
+      while (i < lines.length && isOrdered(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^\d+\.\s+/, ''));
+        i++;
+      }
+      blocks.push({ type: 'ol', items }); continue;
+    }
+    if (isQuote(trimmed)) {
+      const callLines = [];
+      while (i < lines.length && isQuote(lines[i].trim())) {
+        callLines.push(lines[i].trim().replace(/^>\s?/, ''));
+        i++;
+      }
+      blocks.push({ type: 'callout', content: callLines.join('\n') }); continue;
+    }
+    if (isButton(trimmed)) {
+      const m = trimmed.match(/^\[\[Button:\s*(.+?)\s*\|\s*(.+?)\s*\]\]$/);
+      blocks.push({ type: 'button', label: m[1], href: m[2] }); i++; continue;
+    }
+
+    // Paragraph: collect until blank or another block
+    const para = [];
+    while (i < lines.length && lines[i].trim() !== '' && !isBlock(lines[i].trim())) {
+      para.push(lines[i]);
+      i++;
+    }
+    blocks.push({ type: 'p', content: para.join('\n') });
+  }
+
+  /* Inline formatting — applied to text content of each block */
+  function inline(s) {
+    let r = escHtml(s);
+    // Bold first so ** isn't eaten by italic
+    r = r.replace(/\*\*([^*\n]+?)\*\*/g, '<strong style="color:#111111;">$1</strong>');
+    // Italic — only when * is bounded by whitespace/punctuation to avoid eating
+    // unrelated asterisks
+    r = r.replace(/(^|[\s(\[{>])\*([^*\n]+?)\*(?=[\s).,;:!?\]}]|$)/g, '$1<em>$2</em>');
+    // Inline link [text](url) — url is anything up to closing paren, no spaces
+    r = r.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g,
+      '<a href="$2" style="color:#002CCE;text-decoration:underline;">$1</a>');
+    // Single newlines inside a paragraph → <br>
+    r = r.replace(/\n/g, '<br>');
+    return r;
+  }
+
+  function renderBlock(b) {
+    switch (b.type) {
+      case 'hr':
+        return '<hr style="border:none;border-top:1px solid #E2E2FF;margin:24px 0;height:1px;line-height:1px;font-size:1px;">';
+      case 'heading':
+        return '<h2 style="font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:#002CCE;margin:20px 0 10px;letter-spacing:-0.005em;line-height:1.3;">'
+          + inline(b.content) + '</h2>';
+      case 'ul':
+        return '<ul style="margin:0 0 14px;padding-left:22px;">'
+          + b.items.map(it => '<li style="margin-bottom:8px;color:#333333;font-size:15px;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">' + inline(it) + '</li>').join('')
+          + '</ul>';
+      case 'ol':
+        return '<ol style="margin:0 0 14px;padding-left:22px;">'
+          + b.items.map(it => '<li style="margin-bottom:8px;color:#333333;font-size:15px;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">' + inline(it) + '</li>').join('')
+          + '</ol>';
+      case 'callout':
+        return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 16px;background:#F4F4FF;border-left:3px solid #002CCE;border-radius:4px;">'
+          + '<tr><td style="padding:14px 18px;color:#333333;font-size:14.5px;line-height:1.65;font-family:Arial,Helvetica,sans-serif;">'
+          + inline(b.content)
+          + '</td></tr></table>';
+      case 'button':
+        return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">'
+          + '<tr><td bgcolor="#002CCE" style="border-radius:6px;">'
+          + '<a class="em-cta" href="' + escHtml(b.href) + '" style="display:inline-block;background:#002CCE;color:#FFFFFF;padding:13px 26px;text-decoration:none;border-radius:6px;font-weight:700;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1;mso-padding-alt:0;">'
+          + escHtml(b.label) + '</a></td></tr></table>';
+      case 'p':
+      default:
+        return '<p style="margin:0 0 14px;color:#333333;font-size:15px;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">'
+          + inline(b.content) + '</p>';
+    }
+  }
+
+  return blocks.map(renderBlock).join('\n');
+}
+
+/* Wrap the rendered inner HTML in the responsive email shell.
+   The shell is the part that guarantees the email looks the same
+   on every client + screen size — table-based layout + viewport
+   meta + a small media query for phones. */
+function renderEmail(subject, source) {
+  const inner  = mdToHtml(source || '');
+  const title  = (subject || '').trim() || 'FBSPL';
+  const escTit = escHtml(title);
+  return [
+    '<!DOCTYPE html>',
+    '<html>',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
+    '<title>' + escTit + '</title>',
+    '<style>',
+    '  @media only screen and (max-width:620px){',
+    '    .em-card{width:100% !important;border-radius:0 !important;}',
+    '    .em-wrap td{padding-left:0 !important;padding-right:0 !important;}',
+    '    .em-content{padding:24px 20px !important;}',
+    '    .em-header{padding:20px 22px !important;font-size:19px !important;}',
+    '    .em-cta{display:block !important;text-align:center !important;}',
+    '  }',
+    '</style>',
+    '</head>',
+    '<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;">',
+    '<table class="em-wrap" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f4">',
+    '<tr><td align="center" style="padding:24px 12px;">',
+    '<table class="em-card" role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="margin:0 auto;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">',
+    '<tr><td class="em-header" style="background:#002CCE;color:#ffffff;padding:22px 28px;text-align:left;font-size:22px;font-weight:700;letter-spacing:-0.01em;font-family:Arial,Helvetica,sans-serif;line-height:1.2;">' + escTit + '</td></tr>',
+    '<tr><td class="em-content" style="padding:30px;color:#333333;font-size:15px;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">',
+    inner,
+    '</td></tr>',
+    '</table>',
+    '</td></tr>',
+    '</table>',
+    '</body>',
+    '</html>'
+  ].join('\n');
+}
+
+
+/* ============================================================
+   EMAIL EDITOR MODULE
+   ------------------------------------------------------------
+   - Lazy-init when Email Editor tab first opens
+   - Mounts on the shared Settings state (so Save here writes the
+     same Supabase row as Save in Settings)
+   - For each template: subject + plain-text source + optional
+     attachment URL; live preview iframe renders responsive HTML
+   - "Raw HTML" mode bypasses the converter for power users
+   ============================================================ */
+const EmailEditor = (function () {
+  let initialised = false;
+  let activeId = null;
+  let lastFocusedField = 'source';   // 'subject' | 'source' | 'raw'
+  let previewMode = 'desktop';       // 'desktop' | 'mobile'
+
+  const TEMPLATES = [
+    { id:'audit',              idx:'01', title:'AOS Audit Onboarding',     desc:'Sent immediately when a new client row is added. The first touch in the onboarding sequence.', badge:'First touch',
+      subjectKey:'audit_email_subject', bodyKey:'audit_email_body', sourceKey:'audit_email_source', modeKey:'audit_email_mode',
+      attachKey:'audit_attachment_url', attachLabel:'AOS Pre-Audit Checklist',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Audit_Start_Date}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'invoice',            idx:'02', title:'Invoice Email',            desc:'Delivered to the client roughly one week before the audit start date (see Cadence → Invoice lead days in Settings).', badge:'~1 week pre-audit',
+      subjectKey:'invoice_subject', bodyKey:'invoice_body', sourceKey:'invoice_source', modeKey:'invoice_mode',
+      attachKey:'invoice_attachment_url', attachLabel:'Invoice PDF',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'nda',                idx:'03', title:'NDA Email',                desc:'Cover email that delivers the Non-Disclosure Agreement for signature. The attached NDA document is rendered per-client from the HTML template in the document sub-card below.', badge:'Legal',
+      subjectKey:'nda_subject', bodyKey:'nda_body', sourceKey:'nda_source', modeKey:'nda_mode',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'],
+      /* The NDA email has a nested "document" — the HTML body of the file
+         the workflow attaches as "NDA - <Agency_Name>.html". Editing both
+         in one place keeps cover-letter and contract changes coordinated. */
+      documentBodyKey:'nda_template_html',
+      documentTitle:'NDA document (attached to this email)',
+      documentDesc:'HTML body of the NDA that the workflow renders per-client and attaches to this email as “NDA - <Agency_Name>.html”. Tokens are filled with each client\'s values at send time. The default below is a generic sample — replace with your attorney-approved language before going live.',
+      documentBadge:'Per-client · auto-rendered',
+      documentTokens:['{{Agency_Name}}','{{Agency_Contact_Name}}','{{Agency_Address}}','{{Audit_Start_Date}}','{{Sender_Name}}','{{Title}}','{{Today}}'] },
+
+    { id:'intro',              idx:'04', title:'Introduce Laura',          desc:'Sent to the agency contact so they can introduce Laura to their team before interviews are scheduled.', badge:'Intro',
+      subjectKey:'intro_subject', bodyKey:'intro_body', sourceKey:'intro_source', modeKey:'intro_mode',
+      tokens:['{{Team_Member_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'kickoff',            idx:'05', title:'Kickoff Meeting Invite',   desc:'Calendly link for the 30-minute audit kickoff call + the staff interview form link.', badge:'Scheduling',
+      subjectKey:'kickoff_subject', bodyKey:'kickoff_body', sourceKey:'kickoff_source', modeKey:'kickoff_mode',
+      attachKey:'kickoff_attachment_url', attachLabel:'Kickoff agenda',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Calendly_Link}}','{{Google_Form_Link}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'ams',                idx:'06', title:'AMS Credentials Request',  desc:'Sent a few days before the audit start date — close enough that credentials are fresh when the audit begins.', badge:'~5 days pre-audit',
+      subjectKey:'ams_subject', bodyKey:'ams_body', sourceKey:'ams_source', modeKey:'ams_mode',
+      attachKey:'ams_attachment_url', attachLabel:'AMS access instructions',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'interview',          idx:'07', title:'Staff Interview Scheduling', desc:'Sent only after the agency owner emails their staff and CCs Laura (the AOS Interview Trigger sub-workflow watches her inbox).', badge:'Triggered',
+      subjectKey:'interview_subject', bodyKey:'interview_body', sourceKey:'interview_source', modeKey:'interview_mode',
+      attachKey:'interview_attachment_url', attachLabel:'Interview prep',
+      tokens:['{{Team_Member_Name}}','{{Agency_Name}}','{{Calendly_Link}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'interview-reminder', idx:'08', title:'Interview Reminder (24h)', desc:'Sent automatically the day before each scheduled interview.', badge:'Reminder',
+      subjectKey:'interview_reminder_subject', bodyKey:'interview_reminder_body', sourceKey:'interview_reminder_source', modeKey:'interview_reminder_mode',
+      tokens:['{{Team_Member_Name}}','{{Interview_Date_Time}}','{{Meeting_Link}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'ams-reminder',       idx:'09', title:'AMS Credentials Reminder', desc:'Sent when AMS access has not been received within the AMS overdue threshold (configurable in Settings → Cadence).', badge:'Reminder',
+      subjectKey:'ams_reminder_subject', bodyKey:'ams_reminder_body', sourceKey:'ams_reminder_source', modeKey:'ams_reminder_mode',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'nda-reminder',       idx:'10', title:'NDA Reminder',             desc:'Sent when an NDA is unsigned past the NDA overdue threshold.', badge:'Reminder',
+      subjectKey:'nda_reminder_subject', bodyKey:'nda_reminder_body', sourceKey:'nda_reminder_source', modeKey:'nda_reminder_mode',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'] },
+
+    { id:'payment-reminder',   idx:'11', title:'Payment Reminder',         desc:'Sent when an invoice is unpaid past the invoice overdue threshold.', badge:'Reminder',
+      subjectKey:'payment_reminder_subject', bodyKey:'payment_reminder_body', sourceKey:'payment_reminder_source', modeKey:'payment_reminder_mode',
+      tokens:['{{Agency_Contact_Name}}','{{Agency_Name}}','{{Sender_Name}}','{{Title}}'] }
+  ];
+
+  function tpl(id) { return TEMPLATES.find(t => t.id === id); }
+
+  /* ---------- DOM refs (looked up on init) ---------- */
+  let tplList, metaTag, metaTitle, metaDesc, metaBadge,
+      subjectInput, tokensWrap, attachWrap, attachInput, uploadBtn, uploadStatus,
+      modesWrap, fmtBar, sourceTa, rawTa, editorTitleEl,
+      previewSubj, previewSubjText, previewIframe, previewToggle,
+      saveBtn, discardBtn, dirtyInfo, dirtyCount, dirtyLabel, resetTplBtn,
+      docCard, docMetaTitle, docMetaDesc, docMetaBadge, docTokensWrap, docTa, docIframe;
+
+  /* ============================================================
+     RENDER THE TEMPLATE LIST (left rail)
+     ============================================================ */
+  function renderTemplateList() {
+    tplList.innerHTML = '';
+    TEMPLATES.forEach(t => {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.tpl = t.id;
+      btn.innerHTML = '<span class="ee-tpl-name">' + escHtml(t.title) + '</span><span class="ee-idx">' + escHtml(t.idx) + '</span><span class="ee-dot" aria-hidden="true"></span>';
+      btn.addEventListener('click', () => selectTemplate(t.id));
+      li.appendChild(btn);
+      tplList.appendChild(li);
+    });
+  }
+
+  /* Mark each template button .active / .dirty */
+  function refreshTemplateListState() {
+    const cur  = Settings.state();
+    const saved = (function () {
+      // we can't reach `saved` directly; compare key-by-key by re-using
+      // Settings.hasUnsavedChanges() indirectly. Easier: ask the DOM
+      // (the existing dirtyKeys logic owns the truth, but isn't exposed
+      // per-key). So we mirror it via Settings.onDirtyChange and use
+      // a tiny diff helper that recomputes from current vs the snapshot
+      // captured the last time fireStateReplaced ran.
+      return EmailEditor._savedSnapshot || {};
+    })();
+
+    tplList.querySelectorAll('button').forEach(btn => {
+      const t = tpl(btn.dataset.tpl);
+      if (!t) return;
+      btn.classList.toggle('active', btn.dataset.tpl === activeId);
+      const dirty = templateIsDirty(t, cur, saved);
+      btn.classList.toggle('dirty', dirty);
+    });
+  }
+  function templateIsDirty(t, cur, saved) {
+    const keys = [t.subjectKey, t.sourceKey, t.bodyKey, t.modeKey, t.attachKey, t.documentBodyKey].filter(Boolean);
+    for (const k of keys) {
+      if (JSON.stringify(cur[k]) !== JSON.stringify(saved[k])) return true;
+    }
+    return false;
+  }
+
+  /* ============================================================
+     SELECT TEMPLATE — populate the editor pane
+     ============================================================ */
+  function selectTemplate(id) {
+    const t = tpl(id);
+    if (!t) return;
+    activeId = id;
+    const cur = Settings.state();
+
+    // Make sure mode is set (default 'text')
+    if (cur[t.modeKey] !== 'text' && cur[t.modeKey] !== 'html') {
+      cur[t.modeKey] = 'text';
+    }
+    // Make sure source has a value (fall back to defaults)
+    if (cur[t.sourceKey] === undefined || cur[t.sourceKey] === null) {
+      cur[t.sourceKey] = Settings.defaults()[t.sourceKey] || '';
+    }
+
+    /* meta */
+    metaTag.textContent  = 'Template · ' + t.idx;
+    metaTitle.textContent = t.title;
+    metaDesc.textContent  = t.desc;
+    metaBadge.textContent = t.badge;
+
+    /* subject */
+    subjectInput.value = cur[t.subjectKey] || '';
+
+    /* tokens */
+    tokensWrap.innerHTML = '';
+    t.tokens.forEach(tk => {
+      const span = document.createElement('span');
+      span.className = 'tok';
+      span.textContent = tk;
+      span.addEventListener('click', () => insertTokenAtCursor(tk));
+      tokensWrap.appendChild(span);
+    });
+
+    /* attachment field — show only if this template has one */
+    if (t.attachKey) {
+      attachWrap.style.display = '';
+      attachInput.value = cur[t.attachKey] || '';
+      attachInput.dataset.targetKey = t.attachKey;
+      uploadBtn.dataset.targetKey = t.attachKey;
+      uploadStatus.textContent = '';
+      uploadStatus.className = 'upload-status';
+    } else {
+      attachWrap.style.display = 'none';
+    }
+
+    /* mode tabs */
+    modesWrap.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.mode === cur[t.modeKey]));
+
+    /* editor textareas */
+    sourceTa.value = cur[t.sourceKey] || '';
+    rawTa.value    = cur[t.bodyKey]   || '';
+    applyMode(cur[t.modeKey]);
+
+    /* Document sub-card (nested attachment for the NDA email, etc.) */
+    if (t.documentBodyKey) {
+      docCard.style.display = '';
+      docMetaTitle.textContent = t.documentTitle;
+      docMetaDesc.textContent  = t.documentDesc;
+      docMetaBadge.textContent = t.documentBadge;
+      docTokensWrap.innerHTML  = '';
+      (t.documentTokens || []).forEach(tk => {
+        const span = document.createElement('span');
+        span.className = 'tok';
+        span.textContent = tk;
+        span.addEventListener('click', () => insertAtCursor(docTa, tk) || docTa.dispatchEvent(new Event('input', { bubbles: true })));
+        docTokensWrap.appendChild(span);
+      });
+      docTa.value = cur[t.documentBodyKey] || '';
+      refreshDocPreview();
+    } else {
+      docCard.style.display = 'none';
+    }
+
+    /* preview */
+    refreshPreview();
+
+    /* sidebar state */
+    refreshTemplateListState();
+  }
+
+  function applyMode(mode) {
+    if (mode === 'html') {
+      sourceTa.style.display = 'none';
+      rawTa.style.display = '';
+      fmtBar.style.opacity = '.35';
+      fmtBar.style.pointerEvents = 'none';
+      editorTitleEl.textContent = 'Compose · raw HTML';
+    } else {
+      sourceTa.style.display = '';
+      rawTa.style.display = 'none';
+      fmtBar.style.opacity = '1';
+      fmtBar.style.pointerEvents = 'auto';
+      editorTitleEl.textContent = 'Compose · plain text';
+    }
+  }
+
+  /* ============================================================
+     PREVIEW RENDERING
+     ============================================================ */
+  function refreshPreview() {
+    if (!activeId) return;
+    const t   = tpl(activeId);
+    const cur = Settings.state();
+
+    const subjFilled = Settings.fillTokens(cur[t.subjectKey] || '');
+    previewSubjText.textContent = subjFilled || '(no subject)';
+
+    let html;
+    if (cur[t.modeKey] === 'html') {
+      const raw = cur[t.bodyKey] || '';
+      const isFull = /^\s*<!DOCTYPE|^\s*<html/i.test(raw);
+      const filled = Settings.fillTokens(raw);
+      html = isFull ? filled : (
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+        '<style>body{font-family:Arial,Helvetica,sans-serif;color:#333;font-size:15px;line-height:1.7;padding:20px;margin:0;background:#f4f4f4}p{margin:0 0 10px}strong{color:#000}ul{margin:8px 0 12px;padding-left:22px}a{color:#002CCE}</style>' +
+        '</head><body>' + filled + '</body></html>'
+      );
+    } else {
+      html = renderEmail(cur[t.subjectKey] || '', cur[t.sourceKey] || '');
+      html = Settings.fillTokens(html);
+    }
+
+    previewIframe.srcdoc = html;
+    previewIframe.classList.toggle('mobile', previewMode === 'mobile');
+  }
+
+  /* Doc sub-card preview — straight HTML render with sample tokens filled in. */
+  function refreshDocPreview() {
+    if (!activeId) return;
+    const t = tpl(activeId);
+    if (!t || !t.documentBodyKey) return;
+    const raw = Settings.state()[t.documentBodyKey] || '';
+    const isFull = /^\s*<!DOCTYPE|^\s*<html/i.test(raw);
+    const filled = Settings.fillTokens(raw);
+    const html = isFull ? filled : (
+      '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+      '<style>body{font-family:Arial,Helvetica,sans-serif;color:#333;font-size:14px;line-height:1.6;padding:24px;margin:0;background:#fff}p{margin:0 0 10px}h1,h2,h3{color:#002CCE}</style>' +
+      '</head><body>' + (filled || '<p style="color:#9CA3AF;font-style:italic;">No template body yet — the workflow will fall back to its built-in NDA template.</p>') + '</body></html>'
+    );
+    docIframe.srcdoc = html;
+  }
+
+  /* ============================================================
+     EDITOR ↔ STATE WIRING
+     ============================================================ */
+  function bindEditorInputs() {
+    /* Subject */
+    subjectInput.addEventListener('focus', () => { lastFocusedField = 'subject'; });
+    subjectInput.addEventListener('input', () => {
+      const t = tpl(activeId); if (!t) return;
+      Settings.setKey(t.subjectKey, subjectInput.value);
+      // In text mode we also want body to reflect the new subject (banner uses subject as title)
+      if (Settings.state()[t.modeKey] !== 'html') {
+        Settings.setKey(t.bodyKey, renderEmail(subjectInput.value, sourceTa.value));
+      }
+      refreshPreview();
+    });
+
+    /* Source (plain text) */
+    sourceTa.addEventListener('focus', () => { lastFocusedField = 'source'; });
+    sourceTa.addEventListener('input', () => {
+      const t = tpl(activeId); if (!t) return;
+      Settings.setKey(t.sourceKey, sourceTa.value);
+      Settings.setKey(t.bodyKey, renderEmail(subjectInput.value, sourceTa.value));
+      refreshPreview();
+    });
+
+    /* Raw HTML */
+    rawTa.addEventListener('focus', () => { lastFocusedField = 'raw'; });
+    rawTa.addEventListener('input', () => {
+      const t = tpl(activeId); if (!t) return;
+      Settings.setKey(t.bodyKey, rawTa.value);
+      refreshPreview();
+    });
+
+    /* Document body (nested sub-card; currently only NDA email uses this) */
+    docTa.addEventListener('focus', () => { lastFocusedField = 'doc'; });
+    docTa.addEventListener('input', () => {
+      const t = tpl(activeId); if (!t || !t.documentBodyKey) return;
+      Settings.setKey(t.documentBodyKey, docTa.value);
+      refreshDocPreview();
+    });
+
+    /* Attachment URL */
+    attachInput.addEventListener('focus', () => { lastFocusedField = 'attach'; });
+    attachInput.addEventListener('input', () => {
+      const t = tpl(activeId); if (!t || !t.attachKey) return;
+      Settings.setKey(t.attachKey, attachInput.value);
+    });
+
+    /* Mode tabs */
+    modesWrap.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const mode = b.dataset.mode;
+        const t = tpl(activeId); if (!t) return;
+        // If switching text → html for the first time, seed rawTa with the rendered version
+        if (mode === 'html' && (!rawTa.value || rawTa.value.trim() === '')) {
+          rawTa.value = renderEmail(subjectInput.value, sourceTa.value);
+          Settings.setKey(t.bodyKey, rawTa.value);
+        }
+        Settings.setKey(t.modeKey, mode);
+        if (mode === 'text') {
+          // Re-render body from source so we don't keep a stale raw HTML
+          Settings.setKey(t.bodyKey, renderEmail(subjectInput.value, sourceTa.value));
+        }
+        modesWrap.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+        applyMode(mode);
+        refreshPreview();
+      });
+    });
+
+    /* Format toolbar */
+    fmtBar.querySelectorAll('button').forEach(b => {
+      b.addEventListener('mousedown', e => e.preventDefault()); // keep textarea focused
+      b.addEventListener('click', () => applyFormat(b.dataset.fmt));
+    });
+
+    /* Preview toggle */
+    previewToggle.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        previewMode = b.dataset.pv;
+        previewToggle.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+        previewIframe.classList.toggle('mobile', previewMode === 'mobile');
+      });
+    });
+
+    /* Upload button — reuses Settings's existing pipeline */
+    uploadBtn.addEventListener('click', () => {
+      const t = tpl(activeId); if (!t || !t.attachKey) return;
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword';
+      fileInput.onchange = async () => {
+        const f = fileInput.files && fileInput.files[0]; if (!f) return;
+        // Settings.uploadFile expects the target key to drive both the URL input
+        // (which it finds via data-key) and the status element (via
+        // data-upload-status-for). Our ee-* elements use ids, so we temporarily
+        // alias them.
+        attachInput.setAttribute('data-key', t.attachKey);
+        uploadStatus.setAttribute('data-upload-status-for', t.attachKey);
+        await Settings.uploadFile(f, t.attachKey, uploadBtn);
+        // After upload, sync our input value
+        attachInput.value = Settings.state()[t.attachKey] || '';
+      };
+      fileInput.click();
+    });
+
+    /* Reset template */
+    resetTplBtn.addEventListener('click', () => {
+      const t = tpl(activeId); if (!t) return;
+      if (!confirm('Reset "' + t.title + '" to its defaults? (you still need to click Save afterwards)')) return;
+      const D = Settings.defaults();
+      Settings.setKey(t.sourceKey, D[t.sourceKey] || '');
+      Settings.setKey(t.subjectKey, D[t.subjectKey] || '');
+      Settings.setKey(t.modeKey, 'text');
+      Settings.setKey(t.bodyKey, renderEmail(D[t.subjectKey] || '', D[t.sourceKey] || ''));
+      if (t.documentBodyKey) {
+        Settings.setKey(t.documentBodyKey, D[t.documentBodyKey] || '');
+      }
+      selectTemplate(activeId);
+    });
+
+    /* Save / Discard mirror Settings */
+    saveBtn.addEventListener('click', () => Settings.triggerSave());
+    discardBtn.addEventListener('click', () => Settings.triggerDiscard());
+  }
+
+  /* ============================================================
+     INSERT HELPERS (tokens & format toolbar)
+     ============================================================ */
+  function insertTokenAtCursor(token) {
+    const field = (lastFocusedField === 'subject') ? subjectInput
+                 : (lastFocusedField === 'raw')    ? rawTa
+                 : (lastFocusedField === 'doc')    ? docTa
+                 : sourceTa;
+    if (field === subjectInput) {
+      insertAtCursor(field, token);
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      insertAtCursor(field, token);
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  function insertAtCursor(el, text) {
+    const start = el.selectionStart ?? el.value.length;
+    const end   = el.selectionEnd   ?? el.value.length;
+    el.value = el.value.slice(0, start) + text + el.value.slice(end);
+    el.focus();
+    el.selectionStart = el.selectionEnd = start + text.length;
+  }
+
+  function wrapSelection(el, before, after, placeholder) {
+    const start = el.selectionStart;
+    const end   = el.selectionEnd;
+    const sel   = el.value.slice(start, end);
+    const inner = sel || (placeholder || '');
+    const ins   = before + inner + after;
+    el.value = el.value.slice(0, start) + ins + el.value.slice(end);
+    el.focus();
+    if (sel) {
+      el.selectionStart = start + before.length;
+      el.selectionEnd   = start + before.length + inner.length;
+    } else {
+      // place cursor inside the wrapper
+      const pos = start + before.length;
+      el.selectionStart = pos;
+      el.selectionEnd   = pos + inner.length;
+    }
+  }
+
+  function prefixLines(el, prefix) {
+    const start = el.selectionStart;
+    const end   = el.selectionEnd;
+    // Expand to whole lines
+    const lineStart = el.value.lastIndexOf('\n', start - 1) + 1;
+    const lineEndIdx = el.value.indexOf('\n', end);
+    const lineEnd = lineEndIdx === -1 ? el.value.length : lineEndIdx;
+    const region = el.value.slice(lineStart, lineEnd);
+    const lines  = region.split('\n');
+    const out    = lines.map((ln, i) => {
+      if (prefix === '1. ') return (i + 1) + '. ' + ln.replace(/^(?:[-*]\s+|\d+\.\s+|>\s?)/, '');
+      return prefix + ln.replace(/^(?:[-*]\s+|\d+\.\s+|>\s?)/, '');
+    }).join('\n');
+    el.value = el.value.slice(0, lineStart) + out + el.value.slice(lineEnd);
+    el.focus();
+    el.selectionStart = lineStart;
+    el.selectionEnd   = lineStart + out.length;
+  }
+
+  function applyFormat(kind) {
+    const el = sourceTa;
+    switch (kind) {
+      case 'bold':    wrapSelection(el, '**', '**', 'bold text');   break;
+      case 'italic':  wrapSelection(el, '*',  '*',  'italic text'); break;
+      case 'heading': prefixLines(el, '# ');                        break;
+      case 'bullet':  prefixLines(el, '- ');                        break;
+      case 'ordered': prefixLines(el, '1. ');                       break;
+      case 'quote':   prefixLines(el, '> ');                        break;
+      case 'link': {
+        const start = el.selectionStart, end = el.selectionEnd;
+        const sel   = el.value.slice(start, end) || 'link text';
+        const ins   = '[' + sel + '](https://)';
+        el.value = el.value.slice(0, start) + ins + el.value.slice(end);
+        el.focus();
+        // Place cursor inside the URL portion
+        const urlStart = start + sel.length + 3; // after `](`
+        el.selectionStart = urlStart;
+        el.selectionEnd   = urlStart + 'https://'.length;
+        break;
+      }
+      case 'button': {
+        const start = el.selectionStart, end = el.selectionEnd;
+        const label = el.value.slice(start, end) || 'Button Label';
+        const ins   = '[[Button: ' + label + '|https://]]';
+        el.value = el.value.slice(0, start) + ins + el.value.slice(end);
+        el.focus();
+        const urlStart = start + '[[Button: '.length + label.length + '|'.length;
+        el.selectionStart = urlStart;
+        el.selectionEnd   = urlStart + 'https://'.length;
+        break;
+      }
+      case 'hr': {
+        const start = el.selectionStart;
+        // Insert on its own line
+        let prefix = '';
+        if (start > 0 && el.value[start - 1] !== '\n') prefix = '\n';
+        const ins = prefix + '---\n';
+        el.value = el.value.slice(0, start) + ins + el.value.slice(start);
+        el.focus();
+        el.selectionStart = el.selectionEnd = start + ins.length;
+        break;
+      }
+    }
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  /* ============================================================
+     DIRTY-COUNT MIRROR (Email Editor toolbar)
+     ============================================================ */
+  function refreshDirtyMirror() {
+    // Re-use the same DOM that Settings already maintains, plus mirror to our toolbar
+    const n = parseInt(document.getElementById('dirtyCount').textContent, 10) || 0;
+    dirtyCount.textContent = n;
+    dirtyLabel.textContent = n === 1 ? 'unsaved change' : 'unsaved changes';
+    dirtyInfo.classList.toggle('clean', n === 0);
+    refreshTemplateListState();
+  }
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  async function init() {
+    if (initialised) return;
+
+    /* Make sure Settings has loaded its state (it's idempotent) */
+    await Settings.init();
+
+    /* DOM */
+    tplList         = document.getElementById('eeTplList');
+    metaTag         = document.getElementById('eeMetaTag');
+    metaTitle       = document.getElementById('eeMetaTitle');
+    metaDesc        = document.getElementById('eeMetaDesc');
+    metaBadge       = document.getElementById('eeMetaBadge');
+    subjectInput    = document.getElementById('eeSubject');
+    tokensWrap      = document.getElementById('eeTokens');
+    attachWrap      = document.getElementById('eeAttachWrap');
+    attachInput     = document.getElementById('eeAttachUrl');
+    uploadBtn       = document.getElementById('eeUploadBtn');
+    uploadStatus    = document.getElementById('eeUploadStatus');
+    modesWrap       = document.querySelector('.view-email .ee-modes');
+    fmtBar          = document.getElementById('eeFmtBar');
+    sourceTa        = document.getElementById('eeSource');
+    rawTa           = document.getElementById('eeRawHtml');
+    editorTitleEl   = document.getElementById('eeEditorTitle');
+    previewSubj     = document.getElementById('eePreviewSubj');
+    previewSubjText = document.getElementById('eePreviewSubjText');
+    previewIframe   = document.getElementById('eePreview');
+    previewToggle   = document.getElementById('eePreviewToggle');
+    saveBtn         = document.getElementById('eeSaveBtn');
+    discardBtn      = document.getElementById('eeDiscardBtn');
+    dirtyInfo       = document.getElementById('eeDirtyInfo');
+    dirtyCount      = document.getElementById('eeDirtyCount');
+    dirtyLabel      = document.getElementById('eeDirtyLabel');
+    resetTplBtn     = document.getElementById('eeResetTplBtn');
+    docCard         = document.getElementById('eeDocCard');
+    docMetaTitle    = document.getElementById('eeDocMetaTitle');
+    docMetaDesc     = document.getElementById('eeDocMetaDesc');
+    docMetaBadge    = document.getElementById('eeDocMetaBadge');
+    docTokensWrap   = document.getElementById('eeDocTokens');
+    docTa           = document.getElementById('eeDocBody');
+    docIframe       = document.getElementById('eeDocPreview');
+
+    /* Make sure every template has a usable body — if a user has legacy
+       Supabase data with HTML body but no source/mode yet, we keep their
+       body and default the mode to 'text' (next edit will re-render). */
+    const cur = Settings.state();
+    const D   = Settings.defaults();
+    TEMPLATES.forEach(t => {
+      if (cur[t.modeKey] !== 'text' && cur[t.modeKey] !== 'html') cur[t.modeKey] = 'text';
+      if (cur[t.sourceKey] === undefined || cur[t.sourceKey] === null) cur[t.sourceKey] = D[t.sourceKey] || '';
+      // We intentionally do NOT auto-populate documentBodyKey here — if it's
+      // empty in Supabase, the workflow falls back to its built-in template
+      // and the operator can click "Reset to defaults" to pull the sample in.
+    });
+    /* Snapshot of the saved state for per-template dirty detection.
+       We re-snapshot whenever Settings re-loads/saves/resets state. */
+    EmailEditor._savedSnapshot = JSON.parse(JSON.stringify(cur));
+
+    renderTemplateList();
+    bindEditorInputs();
+    selectTemplate(TEMPLATES[0].id);
+
+    /* Subscribe to Settings events so we stay in sync when the user
+       saves/resets/imports/discards from either toolbar. */
+    Settings.onDirtyChange(refreshDirtyMirror);
+    Settings.onStateReplaced(() => {
+      // Re-snapshot from the new saved state — Settings just reset/saved/loaded
+      EmailEditor._savedSnapshot = JSON.parse(JSON.stringify(Settings.state()));
+      if (activeId) selectTemplate(activeId);
+      refreshDirtyMirror();
+    });
+    refreshDirtyMirror();
+
+    initialised = true;
+  }
+
+  return { init };
+})();
+</script>
+</body>
+</html>
